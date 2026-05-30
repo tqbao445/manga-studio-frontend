@@ -1,0 +1,280 @@
+<!DOCTYPE html><html class="dark" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>MangaFlow | Join the Production Studio</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/fonts/geist.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-low": "#1b1b1d",
+                    "surface-container-high": "#2a2a2c",
+                    "inverse-primary": "#665590",
+                    "on-surface-variant": "#cbc3d7",
+                    "outline-variant": "#49454f",
+                    "tertiary-fixed": "#f1e588",
+                    "on-surface": "#e5e1e4",
+                    "on-primary-fixed": "#210f48",
+                    "surface-container-lowest": "#0e0e10",
+                    "on-primary-container": "#594983",
+                    "background": "#131315",
+                    "primary-fixed": "#e9ddff",
+                    "surface-tint": "#d0bcff",
+                    "error-container": "#93000a",
+                    "tertiary": "#f1e488",
+                    "surface-dim": "#131315",
+                    "tertiary-fixed-dim": "#d4c86f",
+                    "surface-variant": "#353437",
+                    "tertiary-container": "#d4c86f",
+                    "on-tertiary-fixed": "#201c00",
+                    "primary": "#e9ddff",
+                    "on-error-container": "#ffdad6",
+                    "on-primary": "#37265e",
+                    "secondary-fixed-dim": "#c8c6c8",
+                    "on-error": "#690005",
+                    "outline": "#948f9a",
+                    "primary-container": "#d0bcff",
+                    "on-primary-fixed-variant": "#4d3d76",
+                    "on-secondary-fixed-variant": "#474649",
+                    "surface-container": "#1f1f21",
+                    "surface-container-highest": "#353437",
+                    "secondary-fixed": "#e4e2e4",
+                    "on-secondary-container": "#b6b4b7",
+                    "on-tertiary-container": "#5c5301",
+                    "on-secondary": "#303032",
+                    "inverse-surface": "#e5e1e4",
+                    "secondary": "#c8c6c8",
+                    "primary-fixed-dim": "#d0bcff",
+                    "on-background": "#e5e1e4",
+                    "error": "#ffb4ab",
+                    "surface-bright": "#39393b",
+                    "inverse-on-surface": "#303032",
+                    "on-tertiary": "#363100",
+                    "on-secondary-fixed": "#1b1b1d",
+                    "on-tertiary-fixed-variant": "#4f4800",
+                    "surface": "#131315",
+                    "secondary-container": "#474649"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-margin": "40px",
+                    "base": "8px",
+                    "panel-gap": "20px",
+                    "gutter": "16px",
+                    "container-padding": "24px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Geist"],
+                    "label-md": ["Geist"],
+                    "label-sm": ["Geist"],
+                    "headline-lg-mobile": ["Geist"],
+                    "body-lg": ["Geist"],
+                    "headline-md": ["Geist"],
+                    "headline-lg": ["Geist"],
+                    "body-md": ["Geist"]
+            },
+            "fontSize": {
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #131315;
+            color: #e5e1e4;
+            font-family: 'Geist', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(27, 27, 29, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(73, 69, 79, 0.3);
+        }
+        .focus-glow:focus-within {
+            box-shadow: 0 0 0 2px rgba(208, 188, 255, 0.2);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #131315;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #49454f;
+            border-radius: 10px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="flex min-h-screen">
+<!-- Split Screen Container -->
+<main class="flex flex-col md:flex-row w-full min-h-screen">
+<!-- Left Side: Visual Anchor -->
+<section class="hidden md:flex relative w-[60%] h-full overflow-hidden items-center justify-center">
+<div class="absolute inset-0 z-0">
+<img alt="MangaFlow Studio Illustration" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/ADBb0uhlXxb_JIuV5bBwuzYHgrO7QCyIsC7OPunWiDN9epVbhO2rE4RB8QgLc1FlBthDULuEBG-1NJqp4l7Gp--7ZdfCuAKI02o-wQKPRX05BR_xwJ0ANrRmQP7Mh9i81gFJbi2FPUn07-cRxmQeXg3bM2a7nER77ZMcatN6NcNbv6ZEnk_p7Kqho0BFut8VLVJGfgPXj3zpetPaxTYBHohjhodI6_et9X5Usek6unjbZ9aHtZK0-9u4Q0HbZwI">
+<!-- Subtle Dark Overlay with purple tint -->
+<div class="absolute inset-0 bg-gradient-to-tr from-background via-background/60 to-primary/10"></div>
+</div>
+<div class="relative z-10 px-container-padding max-w-2xl">
+<div class="flex items-center gap-4 mb-gutter">
+<span class="material-symbols-outlined text-primary text-[48px]" style="font-variation-settings: &quot;FILL&quot; 1;">auto_stories</span>
+<h1 class="font-display-lg text-display-lg tracking-tighter text-on-surface">MangaFlow</h1>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
+                    The professional "dark studio" for digital manga production. Streamline your workflow, manage your series, and collaborate with your team in a high-performance environment.
+                </p>
+<div class="mt-section-margin flex gap-base">
+
+</div>
+</div>
+</section>
+<!-- Right Side: Registration Form -->
+<section class="w-full md:w-[40%] flex flex-col items-center justify-center bg-background p-gutter md:p-section-margin custom-scrollbar overflow-y-auto">
+<div class="w-full max-w-md space-y-panel-gap">
+<!-- Mobile Logo Header -->
+<div class="md:hidden flex flex-col items-center mb-section-margin">
+<span class="material-symbols-outlined text-primary text-[40px] mb-2" style="font-variation-settings: &quot;FILL&quot; 1;">auto_stories</span>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">MangaFlow</h1>
+</div>
+<header class="space-y-2">
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Create an Account</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Start your production journey today.</p>
+</header>
+<form class="space-y-base" onsubmit="event.preventDefault()">
+<!-- Profile Name -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant px-1">Profile Name</label>
+<div class="flex items-center gap-3 px-gutter py-3 rounded-xl bg-surface-container-low border border-outline-variant/30 focus-within:border-primary transition-all focus-glow">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">person</span>
+<input class="bg-transparent border-none outline-none focus:ring-0 w-full font-body-md text-body-md text-on-surface placeholder:text-outline" placeholder="e.g. StudioGhibli_Assistant" type="text">
+</div>
+</div>
+<!-- Email -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant px-1">Email Address</label>
+<div class="flex items-center gap-3 px-gutter py-3 rounded-xl bg-surface-container-low border border-outline-variant/30 focus-within:border-primary transition-all focus-glow">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">mail</span>
+<input class="bg-transparent border-none outline-none focus:ring-0 w-full font-body-md text-body-md text-on-surface placeholder:text-outline" placeholder="name@studio.com" type="email">
+</div>
+</div>
+<!-- Password -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant px-1">Password</label>
+<div class="flex items-center gap-3 px-gutter py-3 rounded-xl bg-surface-container-low border border-outline-variant/30 focus-within:border-primary transition-all focus-glow">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">lock</span>
+<input class="bg-transparent border-none outline-none focus:ring-0 w-full font-body-md text-body-md text-on-surface placeholder:text-outline" id="password-input" placeholder="••••••••" type="password">
+<button class="text-on-surface-variant hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+<!-- Strength Indicator -->
+<div class="flex gap-1 px-1 h-1.5 mt-2">
+<div class="w-1/4 h-full rounded-full bg-primary"></div>
+<div class="w-1/4 h-full rounded-full bg-primary"></div>
+<div class="w-1/4 h-full rounded-full bg-outline-variant/30"></div>
+<div class="w-1/4 h-full rounded-full bg-outline-variant/30"></div>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant px-1">Strength: Medium</p>
+</div>
+<!-- Confirm Password -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant px-1">Confirm Password</label>
+<div class="flex items-center gap-3 px-gutter py-3 rounded-xl bg-surface-container-low border border-outline-variant/30 focus-within:border-primary transition-all focus-glow">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">shield</span>
+<input class="bg-transparent border-none outline-none focus:ring-0 w-full font-body-md text-body-md text-on-surface placeholder:text-outline" placeholder="••••••••" type="password">
+</div>
+</div>
+<!-- Role Selection -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant px-1">Role Selection</label>
+<div class="grid gap-2 grid-cols-2"><button class="flex flex-col items-center justify-center p-base rounded-xl bg-surface-container border border-primary text-primary transition-all scale-95 ring-1 ring-primary/20" type="button">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: &quot;FILL&quot; 1;">edit_note</span>
+<span class="font-label-sm text-label-sm">Mangaka</span>
+</button>
+<button class="flex flex-col items-center justify-center p-base rounded-xl bg-surface-container-low border border-outline-variant/30 text-on-surface-variant hover:border-primary/50 transition-all" type="button">
+<span class="material-symbols-outlined mb-1">ink_pen</span>
+<span class="font-label-sm text-label-sm">Assistant</span>
+</button></div>
+</div>
+<!-- Terms -->
+<div class="flex items-start gap-3 py-2 px-1">
+<div class="relative flex items-center">
+<input class="w-5 h-5 rounded-md bg-surface-container-low border-outline-variant/30 text-primary focus:ring-primary focus:ring-offset-background cursor-pointer" id="terms" type="checkbox">
+</div>
+<label class="font-label-md text-label-md text-on-surface-variant cursor-pointer select-none" for="terms">
+                            I agree to the <a class="text-primary hover:underline" href="#">Terms of Service</a> and <a class="text-primary hover:underline" href="#">Privacy Policy</a>.
+                        </label>
+</div>
+<!-- Actions -->
+<div class="pt-4 space-y-4">
+<button class="w-full bg-primary text-on-primary py-4 rounded-xl font-headline-md text-headline-md font-bold shadow-[0_0_20px_rgba(208,188,255,0.15)] hover:brightness-110 active:scale-[0.98] transition-all">
+                            Create Account
+                        </button>
+
+
+</div>
+</form>
+<footer class="pt-base pb-section-margin text-center">
+<p class="font-body-md text-body-md text-on-surface-variant">
+                        Already have an account? 
+                        <a class="text-primary font-bold hover:underline ml-1" href="#">Sign In</a>
+</p>
+</footer>
+</div>
+</section>
+</main>
+<script>
+        // Simple Interaction logic for role selection
+        const roleButtons = document.querySelectorAll('button[type="button"].grid-cols-3 > button');
+        roleButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                roleButtons.forEach(b => {
+                    b.classList.remove('border-primary', 'text-primary', 'ring-1', 'ring-primary/20', 'scale-95');
+                    b.classList.add('border-outline-variant/30', 'text-on-surface-variant');
+                    const icon = b.querySelector('.material-symbols-outlined');
+                    if(icon) icon.style.fontVariationSettings = "'FILL' 0";
+                });
+                btn.classList.add('border-primary', 'text-primary', 'ring-1', 'ring-primary/20', 'scale-95');
+                btn.classList.remove('border-outline-variant/30', 'text-on-surface-variant');
+                const activeIcon = btn.querySelector('.material-symbols-outlined');
+                if(activeIcon) activeIcon.style.fontVariationSettings = "'FILL' 1";
+            });
+        });
+
+        // Toggle Password Visibility
+        const pwToggle = document.querySelector('button[type="button"] .material-symbols-outlined');
+        const pwInput = document.getElementById('password-input');
+        if (pwToggle && pwInput) {
+            pwToggle.parentElement.addEventListener('click', () => {
+                const isPassword = pwInput.type === 'password';
+                pwInput.type = isPassword ? 'text' : 'password';
+                pwToggle.textContent = isPassword ? 'visibility_off' : 'visibility';
+            });
+        }
+    </script>
+
+
+</body></html>

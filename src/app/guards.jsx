@@ -9,14 +9,33 @@ import { useAuthStore } from "./stores/authStore";
  * @param {ReactNode} props.children - Component con cần được bảo vệ
  *
  * State sử dụng:
+ *   - initializing (từ useAuthStore): true khi app đang kiểm tra token cũ
  *   - isAuthenticated (từ useAuthStore): true nếu user đã đăng nhập
  *
  * Luồng:
- *   isAuthenticated === false → Navigate đến /login (thay thế lịch sử)
+ *   initializing === true   → hiển thị loading, không redirect (tránh flash login)
+ *   isAuthenticated === false → Navigate đến /login
  *   isAuthenticated === true  → render children
  */
 export function ProtectedRoute({ children }) {
-  const { isAuthenticated } = useAuthStore();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const initializing = useAuthStore((s) => s.initializing);
+
+  // Đang kiểm tra token → chưa kết luận được → show loading
+  if (initializing) {
+    return (
+      <div className="min-h-screen bg-[#131315] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <svg className="animate-spin h-10 w-10 text-[#d0bcff]" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          </svg>
+          <p className="text-[#958ea0] text-sm">Đang khởi tạo...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   return <>{children}</>;
 }
