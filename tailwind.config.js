@@ -55,20 +55,8 @@ export default {
         'primary-fixed-dim': '#d0bcff',
         'on-secondary': '#303032',
         'on-background': '#e5e1e4',
-
-        'accent-cyan': '#00d4aa',
-        'accent-purple': '#7c3aed',
-        'accent-orange': '#f97316',
-
-        workspace: {
-          bg: '#1a1a2e',
-          surface: '#232340',
-          'canvas-bg': '#12121f',
-          text: '#e8e8f0',
-          'text-secondary': '#9494b8',
-          accent: '#4fc3f7',
-          border: '#2a2a4a',
-        },
+        'border': '#494454',
+        'border-light': '#494454',
 
         'status-success': '#16a34a',
         'status-warning': '#ea580c',
@@ -80,28 +68,35 @@ export default {
         'rank-b': '#d97706',
         'rank-c': '#dc2626',
         'rank-d': '#6b7280',
+
+        workspace: {
+          bg: '#1a1a2e',
+          surface: '#232340',
+          'canvas-bg': '#12121f',
+          text: '#e8e8f0',
+          'text-secondary': '#9494b8',
+          accent: '#4fc3f7',
+          border: '#2a2a4a',
+        },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
         geist: ['Geist', 'sans-serif'],
+        sans: ['Geist', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
-        display: ['Anton', 'Impact', 'sans-serif'],
       },
-      fontSize: {
-        'display-lg': ['48px', { lineHeight: '52px', letterSpacing: '0.02em', fontWeight: '400' }],
-        'headline-lg': ['32px', { lineHeight: '40px', letterSpacing: '0.01em', fontWeight: '400' }],
-        'headline-mobile': ['24px', { lineHeight: '32px', fontWeight: '400' }],
+      borderRadius: {
+        DEFAULT: '0.5rem',
+        'lg': '0.5rem',
+        'xl': '0.75rem',
+        '2xl': '1rem',
+        '3xl': '1.5rem',
+        'full': '9999px',
       },
       spacing: {
-        gutter: '16px',
-        sidebar: '240px',
         'container-padding': '24px',
         'panel-gap': '20px',
-        base: '8px',
-      },
-      borderWidth: {
-        thin: '1px',
-        thick: '3px',
+        'base': '8px',
+        'gutter': '16px',
       },
       borderRadius: {
         lg: '0.5rem',

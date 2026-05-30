@@ -4,11 +4,11 @@
 
 @layer base {
   * {
-    @apply border-outline-variant/30;
+    @apply border-outline-variant;
   }
 
   body {
-    @apply bg-surface text-on-surface font-sans antialiased;
+    @apply bg-background text-on-background font-sans antialiased;
   }
 
   ::selection {
@@ -17,11 +17,6 @@
 }
 
 @layer components {
-  .material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-    font-size: inherit;
-  }
-
   .glass-panel {
     background: rgba(27, 27, 29, 0.7);
     backdrop-filter: blur(12px);
@@ -36,13 +31,8 @@
   }
 
   .active-nav {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(139, 92, 246, 0.05) 100%);
+    background: rgba(139, 92, 246, 0.1);
     color: #8b5cf6;
-    box-shadow: 0 1px 3px rgba(139, 92, 246, 0.08);
-  }
-
-  .card-ink {
-    @apply bg-surface-container-low rounded-3xl border border-outline-variant/20;
   }
 
   .card-ink-hover {
@@ -51,25 +41,8 @@
 }
 
 @layer utilities {
-  .scrollbar-thin {
-    scrollbar-width: thin;
-    scrollbar-color: #353437 transparent;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: #353437;
-    border-radius: 10px;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background-color: #8b5cf6;
-  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #131315; }
+  ::-webkit-scrollbar-thumb { background: #353437; border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: #8b5cf6; }
 }
