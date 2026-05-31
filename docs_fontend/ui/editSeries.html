@@ -1,0 +1,397 @@
+<!DOCTYPE html><html class="dark" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Edit Series | MangaFlow</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #131315;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #353437;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #494454;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#e4e2e4",
+                        "surface-container-low": "#1b1b1d",
+                        "secondary": "#c8c6c8",
+                        "on-primary": "#3c0091",
+                        "outline-variant": "#494454",
+                        "surface-tint": "#d0bcff",
+                        "on-error": "#690005",
+                        "on-error-container": "#ffdad6",
+                        "inverse-primary": "#6d3bd7",
+                        "primary-container": "#a078ff",
+                        "on-secondary-fixed": "#1b1b1d",
+                        "error-container": "#93000a",
+                        "surface-container-highest": "#353437",
+                        "on-secondary-fixed-variant": "#474649",
+                        "surface-container-high": "#2a2a2c",
+                        "on-surface-variant": "#cbc3d7",
+                        "background": "#131315",
+                        "tertiary-fixed-dim": "#ffb869",
+                        "primary-fixed": "#e9ddff",
+                        "on-primary-fixed-variant": "#5516be",
+                        "on-secondary": "#303032",
+                        "tertiary-fixed": "#ffdcbb",
+                        "secondary-fixed-dim": "#c8c6c8",
+                        "on-background": "#e5e1e4",
+                        "error": "#ffb4ab",
+                        "inverse-on-surface": "#303032",
+                        "primary-fixed-dim": "#d0bcff",
+                        "surface-container-lowest": "#0e0e10",
+                        "on-primary-fixed": "#23005c",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "on-surface": "#e5e1e4",
+                        "surface-variant": "#353437",
+                        "on-tertiary": "#482900",
+                        "tertiary-container": "#ca801e",
+                        "on-secondary-container": "#b6b4b7",
+                        "surface-bright": "#39393b",
+                        "tertiary": "#ffb869",
+                        "secondary-container": "#474649",
+                        "primary": "#d0bcff",
+                        "outline": "#958ea0",
+                        "on-tertiary-fixed": "#2c1700",
+                        "surface": "#131315",
+                        "surface-dim": "#131315",
+                        "surface-container": "#201f21",
+                        "on-primary-container": "#340080",
+                        "inverse-surface": "#e5e1e4",
+                        "on-tertiary-container": "#3f2300"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "panel-gap": "20px",
+                        "gutter": "16px",
+                        "container-padding": "24px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "body-lg": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "headline-md": ["Geist"],
+                        "body-md": ["Geist"],
+                        "label-md": ["Geist"],
+                        "headline-lg-mobile": ["Geist"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md overflow-x-hidden">
+<!-- SideNavBar (Shared Component) -->
+<aside class="fixed left-0 top-0 h-screen w-[240px] z-50 bg-surface border-r border-outline-variant shadow-sm flex flex-col py-base space-y-2">
+<div class="px-gutter mb-8">
+<div class="flex items-center space-x-3">
+<div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary text-2xl" data-icon="brush">brush</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary tracking-tight leading-none">MangaFlow</h1>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">Creative Studio</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 text-on-surface-variant font-medium hover:bg-surface-container-high hover:text-primary group" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="dashboard">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 text-primary font-bold border-r-2 border-primary bg-surface-container-high/50" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="auto_stories">auto_stories</span>
+<span class="font-label-md text-label-md">Manuscripts</span>
+</a>
+<a class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 text-on-surface-variant font-medium hover:bg-surface-container-high hover:text-primary group" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="brush">brush</span>
+<span class="font-label-md text-label-md">Inking</span>
+</a>
+<a class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 text-on-surface-variant font-medium hover:bg-surface-container-high hover:text-primary group" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="view_quilt">view_quilt</span>
+<span class="font-label-md text-label-md">Storyboard</span>
+</a>
+<a class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 text-on-surface-variant font-medium hover:bg-surface-container-high hover:text-primary group" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="group">group</span>
+<span class="font-label-md text-label-md">Team</span>
+</a>
+</nav>
+<div class="mt-auto px-4 pb-4 space-y-1">
+
+<a class="flex items-center px-4 py-2 rounded-xl text-on-surface-variant font-medium hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="settings">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+<a class="flex items-center px-4 py-2 rounded-xl text-on-surface-variant font-medium hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="help_outline">help_outline</span>
+<span class="font-label-md text-label-md">Support</span>
+</a>
+</div>
+</aside>
+<!-- TopNavBar (Shared Component) -->
+<header class="fixed top-0 right-0 w-full md:w-[calc(100%-240px)] h-16 z-40 bg-surface/80 backdrop-blur-md border-b border-outline-variant flex items-center justify-between px-gutter">
+<div class="flex items-center bg-surface-container-low px-4 py-1.5 rounded-full border border-outline-variant/30 min-w-[320px]">
+<span class="material-symbols-outlined text-outline mr-2" data-icon="search">search</span>
+<input class="bg-transparent border-none text-on-surface focus:ring-0 text-sm w-full" placeholder="Search manuscripts, series, or team..." type="text">
+</div>
+<div class="flex items-center space-x-4">
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-primary transition-all hover:scale-105">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-primary transition-all hover:scale-105">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-primary transition-all hover:scale-105">
+<span class="material-symbols-outlined" data-icon="dark_mode">dark_mode</span>
+</button>
+<div class="h-8 w-[1px] bg-outline-variant mx-2"></div>
+<div class="flex items-center space-x-3 pl-2 cursor-pointer hover:bg-surface-container-high p-1 rounded-lg transition-colors">
+<img alt="Lead Artist Avatar" class="w-8 h-8 rounded-full border border-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYVC_EREUFXuSMkrr5xCj2DCQUh9YnkGe74UmEOOLCxKMT6zAwSmKH7bI0LKevimudVFp04W792CGBMQaoBhwmS98P4-t1c9fD1wzAVwR27_ccn2jIgaSe-g8YZ5kh_kvhv56atn4XGLA5gZZPHZGSG187O7DR-zhdM-vt41-RGB2aHRdu2cVcBlGmmlUZ26C20dDBzuKUXy76AVRMkVxKnUw5eHc8aC7TEIzy1Zvq-gooaDSvEh6fHt4SiYLdESZxnmwtzuXH-aJ9">
+<span class="font-label-md text-label-md hidden lg:block">Lead Artist</span>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-24 pb-20 px-gutter md:pl-[264px] min-h-screen">
+<div class="max-w-3xl mx-auto">
+<!-- Header Section -->
+<div class="mb-10">
+<button class="flex items-center text-on-surface-variant hover:text-primary transition-colors group mb-4" onclick="window.history.back()">
+<span class="material-symbols-outlined mr-2 group-hover:-translate-x-1 transition-transform" data-icon="arrow_back">arrow_back</span>
+<span class="font-label-md text-label-md uppercase tracking-wider">Back to Series Detail</span>
+</button>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-2">Edit Series</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Update your series details and manage production settings.</p>
+</div>
+<!-- Form Container -->
+<form class="space-y-panel-gap">
+<!-- Section 1: Basic Information -->
+<div class="bg-surface-container border border-outline-variant/30 rounded-xl p-8 shadow-sm">
+<div class="flex items-center space-x-3 mb-8">
+<span class="material-symbols-outlined text-primary" data-icon="info">info</span>
+<h2 class="font-headline-md text-headline-md">Basic Information</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="md:col-span-2">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-2">Series Title</label>
+<input class="w-full bg-surface-container-lowest border-0 border-b border-outline-variant focus:border-primary focus:ring-0 text-on-surface py-3 transition-all" placeholder="e.g. Neon Horizon: Resonance" type="text">
+</div>
+<div class="md:col-span-2">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-2">Japanese Title (Optional)</label>
+<input class="w-full bg-surface-container-lowest border-0 border-b border-outline-variant focus:border-primary focus:ring-0 text-on-surface py-3 transition-all" placeholder="e.g. ネオン・ホライゾン：共鳴" type="text">
+</div>
+<div class="md:col-span-2">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-2">Synopsis</label>
+<textarea class="w-full bg-surface-container-lowest border-0 border-b border-outline-variant focus:border-primary focus:ring-0 text-on-surface py-3 transition-all resize-none" placeholder="Briefly describe the world, characters, and core conflict..." rows="4"></textarea>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-2">Genre</label>
+<select class="w-full bg-surface-container-lowest border-0 border-b border-outline-variant focus:border-primary focus:ring-0 text-on-surface py-3 transition-all appearance-none">
+<option>Action / Sci-Fi</option>
+<option>Slice of Life</option>
+<option>Psychological Thriller</option>
+<option>Fantasy / Isekai</option>
+<option>Romance</option>
+</select>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-2">Target Demographic</label>
+<select class="w-full bg-surface-container-lowest border-0 border-b border-outline-variant focus:border-primary focus:ring-0 text-on-surface py-3 transition-all appearance-none">
+<option>Seinen</option>
+<option>Shonen</option>
+<option>Josei</option>
+<option>Shojo</option>
+</select>
+</div>
+<div class="md:col-span-2">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-2">Publish Frequency</label>
+<select class="w-full bg-surface-container-lowest border-0 border-b border-outline-variant focus:border-primary focus:ring-0 text-on-surface py-3 transition-all appearance-none">
+<option>Weekly (Recommended)</option>
+<option>Bi-Weekly</option>
+<option>Monthly</option>
+<option>Hiatus / On Demand</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Section 2: Cover Section -->
+<div class="bg-surface-container border border-outline-variant/30 rounded-xl p-8 shadow-sm">
+<div class="flex items-center space-x-3 mb-8">
+<span class="material-symbols-outlined text-primary" data-icon="image">image</span>
+<h2 class="font-headline-md text-headline-md">Cover Artwork</h2>
+</div>
+<div class="flex flex-col md:flex-row gap-8 items-start">
+<div class="w-full md:w-48 aspect-[3/4] bg-surface-container-lowest rounded-lg overflow-hidden relative group border border-outline-variant/30">
+<img src="https://placehold.co/400x600/2a2a2c/d0bcff?text=Current+Cover" alt="Current cover" class="w-full h-full object-cover" />
+<div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer">
+<span class="material-symbols-outlined text-3xl text-white mb-1" data-icon="camera_alt">camera_alt</span>
+<span class="text-xs font-label-sm text-white">Replace Cover</span>
+</div>
+</div>
+<div class="flex-1 space-y-4">
+<div class="bg-surface-container-high/30 p-4 rounded-lg border border-outline-variant/20">
+<h3 class="font-label-md text-primary mb-1">Current Cover</h3>
+<ul class="text-xs space-y-1 text-on-surface-variant">
+<li class="">• Click the preview or drag a new image to replace</li>
+<li class="">• Recommended Size: 1600 x 2400 px</li>
+<li class="">• Formats: JPG, PNG, WEBP</li>
+<li class="">• Max File Size: 10MB</li>
+</ul>
+</div>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+                                Replacing the cover will immediately update the primary visual across the dashboard and external catalogs.
+                            </p>
+</div>
+</div>
+</div>
+<!-- Section 3: Series Info (Edit only) -->
+<div class="bg-surface-container border border-outline-variant/30 rounded-xl p-8 shadow-sm">
+<div class="flex items-center space-x-3 mb-8">
+<span class="material-symbols-outlined text-primary" data-icon="info">info</span>
+<h2 class="font-headline-md text-headline-md">Series Information</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-2">Status</label>
+<p class="text-on-surface font-body-md text-body-md">Ongoing</p>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-2">Created</label>
+<p class="text-on-surface font-body-md text-body-md">Jan 15, 2026</p>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-2">Total Chapters</label>
+<p class="text-on-surface font-body-md text-body-md">12</p>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-2">Global Rank</label>
+<p class="text-on-surface font-body-md text-body-md">#42</p>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-2">Mangaka</label>
+<p class="text-on-surface font-body-md text-body-md">Yuki Tanaka</p>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-2">Tantou Editor</label>
+<p class="text-on-surface font-body-md text-body-md">Hana Sato</p>
+</div>
+</div>
+</div>
+<!-- Section 4: Team Assignment -->
+<div class="bg-surface-container border border-outline-variant/30 rounded-xl p-8 shadow-sm">
+<div class="flex items-center space-x-3 mb-8">
+<span class="material-symbols-outlined text-primary" data-icon="diversity_3">diversity_3</span>
+<h2 class="font-headline-md text-headline-md">Team Assignment</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-2">Assign Mangaka</label>
+<div class="relative">
+<select class="w-full bg-surface-container-lowest border-0 border-b border-outline-variant focus:border-primary focus:ring-0 text-on-surface py-3 transition-all appearance-none">
+<option>Select Artist...</option>
+<option>Yuki Tanaka (Available)</option>
+<option>Kenji Sato (High Load)</option>
+<option>Hina Mori (Available)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-3 text-on-surface-variant pointer-events-none" data-icon="person">person</span>
+</div>
+</div>
+
+</div>
+</div>
+<!-- Section 5: Publishing Info -->
+<div class="bg-surface-container border border-outline-variant/30 rounded-xl p-8 shadow-sm">
+
+
+</div>
+<!-- Form Actions & Toast -->
+<div class="flex flex-col md:flex-row items-center justify-between pt-8 gap-6">
+<div class="flex items-center space-x-3 bg-primary-container text-on-primary-container px-6 py-3 rounded-full shadow-lg opacity-0 transition-all duration-500 translate-y-4" id="successToast">
+<span class="material-symbols-outlined" data-icon="check_circle" data-weight="fill">check_circle</span>
+<span class="font-label-md text-label-md">Draft saved successfully.</span>
+</div>
+<div class="flex items-center space-x-4">
+<button class="px-6 py-2.5 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" type="button">
+                            Cancel
+                        </button>
+<button class="px-6 py-2.5 rounded-lg border border-outline-variant hover:border-primary hover:text-primary font-label-md text-label-md transition-all" onclick="showToast()" type="button">
+                            Save as Draft
+                        </button>
+<button class="bg-primary text-on-primary px-8 py-3 rounded-lg font-bold shadow-lg shadow-primary/20 hover:brightness-110 active:scale-95 transition-all" type="submit">
+                            Save Changes
+                        </button>
+</div>
+</div>
+</form>
+</div>
+</main>
+<script>
+        function showToast() {
+            const toast = document.getElementById('successToast');
+            toast.classList.remove('opacity-0', 'translate-y-4');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-4');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+            }, 3000);
+        }
+
+        // Add subtle focus glow interaction to inputs
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.classList.add('relative');
+                const glow = document.createElement('div');
+                glow.className = 'absolute bottom-0 left-0 w-full h-[2px] bg-primary blur-[2px] opacity-20 pointer-events-none transition-all';
+                glow.id = 'input-focus-glow';
+                input.after(glow);
+            });
+            input.addEventListener('blur', () => {
+                const glow = input.nextElementSibling;
+                if (glow && glow.id === 'input-focus-glow') {
+                    glow.remove();
+                }
+            });
+        });
+    </script>
+
+
+</body></html>

@@ -30,12 +30,11 @@ import {
   ZoomOut,
   Maximize,
   Plus,
+  Minus,
   ChevronLeft,
   ChevronRight,
   PanelRightOpen,
   PanelRightClose,
-  PanelLeftClose,
-  PanelLeftOpen,
   Check,
   RotateCcw,
   X,
@@ -43,7 +42,20 @@ import {
   Pen,
   Highlighter,
   Type,
+  Upload,
+  Undo2,
+  Redo2,
+  Cloud,
+  MoreVertical,
+  BookOpen,
 } from "lucide-react";
+import {
+  DndContext, closestCenter, PointerSensor, useSensor, useSensors,
+} from '@dnd-kit/core'
+import {
+  SortableContext, useSortable, verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { useChapterDetail } from "../../shared/hooks/useMockData";
 import { useWorkspaceStore } from "../../app/stores/workspaceStore";
 import { useSeriesStore } from "../../app/stores/seriesStore";
@@ -94,7 +106,7 @@ const tabDefs = [
   },
 ];
 
-/* Tools cho MANGAKA/ASSISTANT workspace */
+/* Tools cho MANGAKA/ASSISTANT workspace — matches workspace.html */
 const toolDefs = [
   {
     id: "select",
@@ -102,24 +114,19 @@ const toolDefs = [
     label: "Select (V)",
     roles: ["MANGAKA"],
   },
-  { id: "draw", icon: Square, label: "Draw (R)", roles: ["MANGAKA"] },
-  {
-    id: "comment",
-    icon: MessageSquare,
-    label: "Comment (C)",
-    roles: ["MANGAKA", "ASSISTANT"],
-  },
-  { id: "hand", icon: Hand, label: "Pan (H)", roles: ["MANGAKA", "ASSISTANT"] },
+  { id: "hand", icon: Hand, label: "Hand (H)", roles: ["MANGAKA", "ASSISTANT"] },
+  { id: "draw", icon: Square, label: "Region (R)", roles: ["MANGAKA"] },
+  { id: "pen", icon: Pen, label: "Pen (P)", roles: ["MANGAKA"] },
+  { id: "text-annotation", icon: Type, label: "Text (T)", roles: ["MANGAKA"] },
 ];
 
 /* Tools cho review mode (TANTOU_EDITOR / EDITORIAL_BOARD) */
 const reviewTools = [
   { id: "select", icon: MousePointer2, label: "Select (S)" },
-  { id: "comment", icon: MessageSquare, label: "Comment (C)" },
+  { id: "hand", icon: Hand, label: "Pan (V)" },
   { id: "pen", icon: Pen, label: "Pen (P)" },
   { id: "highlight", icon: Highlighter, label: "Highlight (H)" },
   { id: "text-annotation", icon: Type, label: "Text (T)" },
-  { id: "hand", icon: Hand, label: "Pan (V)" },
 ];
 
 export function WorkspacePage() {
@@ -131,6 +138,7 @@ export function WorkspacePage() {
 
   const currentPageId = useWorkspaceStore((s) => s.currentPageId);
   const pages = useWorkspaceStore((s) => s.pages);
+  const regions = useWorkspaceStore((s) => s.regions);
   const zoom = useWorkspaceStore((s) => s.zoom);
   const activeTab = useWorkspaceStore((s) => s.activeTab);
   const loadChapter = useWorkspaceStore((s) => s.loadChapter);
@@ -140,6 +148,7 @@ export function WorkspacePage() {
   const setZoom = useWorkspaceStore((s) => s.setZoom);
   const setActiveTab = useWorkspaceStore((s) => s.setActiveTab);
   const addPage = useWorkspaceStore((s) => s.addPage);
+  const reorderPages = useWorkspaceStore((s) => s.reorderPages);
   const layers = useWorkspaceStore((s) => s.layers);
   const reset = useWorkspaceStore((s) => s.reset);
 
@@ -153,6 +162,7 @@ export function WorkspacePage() {
   const [showRightPanel, setShowRightPanel] = useState(true);
   const [showPagePicker, setShowPagePicker] = useState(false);
   const [layerExpanded, setLayerExpanded] = useState(true);
+  const [leftPanelTab, setLeftPanelTab] = useState('pages');
 
   const { data: chapter, isLoading } = useChapterDetail(id);
   const isTantou = user?.role === "TANTOU_EDITOR";
@@ -211,29 +221,21 @@ export function WorkspacePage() {
           break;
       }
       switch (e.key.toLowerCase()) {
-        case "s":
-          if (isReviewMode) setMode("select");
-          else if (isMangaka) setMode("select");
-          break;
         case "v":
-          if (isReviewMode) setMode("hand");
-          else if (isMangaka) setMode("select");
-          break;
-        case "r":
-          if (!isReviewMode && isMangaka) setMode("draw");
-          break;
-        case "c":
-          setMode("comment");
+          setMode("select");
           break;
         case "h":
           if (isReviewMode) setMode("highlight");
           else setMode("hand");
           break;
+        case "r":
+          if (!isReviewMode && isMangaka) setMode("draw");
+          break;
         case "p":
-          if (isReviewMode) setMode("pen");
+          setMode("pen");
           break;
         case "t":
-          if (isReviewMode) setMode("text-annotation");
+          setMode("text-annotation");
           break;
         case "0":
           setZoom(1);
@@ -243,6 +245,22 @@ export function WorkspacePage() {
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, [setMode, setZoom, isReviewMode, prevPage, nextPage, loadPage]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+  )
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const oldIdx = pages.findIndex((p) => p.id === active.id)
+    const newIdx = pages.findIndex((p) => p.id === over.id)
+    if (oldIdx === -1 || newIdx === -1) return
+    const reordered = [...pages]
+    reordered.splice(oldIdx, 1)
+    reordered.splice(newIdx, 0, pages[oldIdx])
+    reorderPages(reordered.map((p) => p.id))
+  }
 
   if (isLoading) return <PageLoading />;
 
@@ -276,231 +294,148 @@ export function WorkspacePage() {
   )?.Component;
   const currentPage = pages.find((p) => p.id === currentPageId);
 
-  const leftPanelBtn = (
-    <button
-      onClick={() => setShowLeftPanel(!showLeftPanel)}
-      className={cn(
-        "p-1.5 transition-colors",
-        showLeftPanel
-          ? "text-workspace-accent"
-          : "text-workspace-text-secondary hover:text-workspace-text",
-      )}
-      title={showLeftPanel ? "Hide sidebar" : "Show sidebar"}
-    >
-      {showLeftPanel ? (
-        <PanelLeftClose size={16} />
-      ) : (
-        <PanelLeftOpen size={16} />
-      )}
-    </button>
-  );
-
-  const rightPanelBtn = (
-    <button
-      onClick={() => setShowRightPanel(!showRightPanel)}
-      className={cn(
-        "p-1.5 transition-colors",
-        showRightPanel
-          ? "text-workspace-accent"
-          : "text-workspace-text-secondary hover:text-workspace-text",
-      )}
-      title={showRightPanel ? "Hide panel" : "Show panel"}
-    >
-      {showRightPanel ? (
-        <PanelRightClose size={16} />
-      ) : (
-        <PanelRightOpen size={16} />
-      )}
-    </button>
-  );
+  const regionCount = regions.length;
+  const completedRegions = regions.filter((r) => r.status === 'COMPLETED' || r.status === 'APPROVED').length;
 
   return (
-    <div className="h-screen bg-workspace-bg flex flex-col overflow-hidden select-none">
-      {/* ── Top bar ── */}
-      <div className="relative flex-shrink-0">
-        <div className="flex items-center justify-between h-11 px-3 bg-workspace-surface border-b border-workspace-border gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            <button
-              onClick={() =>
-                navigate(
-                  isReviewMode ? "/review" : `/series/${chapter.seriesId}`,
-                )
-              }
-              className="flex items-center gap-1 text-xs text-workspace-text-secondary hover:text-workspace-text transition-colors whitespace-nowrap"
-            >
-              <ArrowLeft size={16} />
-            </button>
-            <div className="w-px h-4 bg-workspace-border" />
-            <span className="text-xs font-medium text-workspace-text truncate max-w-[160px]">
-              {isReviewMode ? "Review: " : ""}Ch.{chapter.chapterNumber}
-              {chapter.title ? ` — ${chapter.title}` : ""}
-            </span>
-            <div className="flex items-center gap-1">
-              <button
-                disabled={!prevPage}
-                onClick={() => prevPage && loadPage(prevPage.id)}
-                className="p-1 rounded text-workspace-text-secondary/70 hover:text-workspace-text hover:bg-workspace-bg/50 disabled:opacity-25 disabled:cursor-default disabled:hover:bg-transparent transition-colors"
-              >
-                <ChevronLeft size={14} />
-              </button>
-              <button
-                onClick={() => setShowPagePicker(!showPagePicker)}
-                className={cn(
-                  "text-xs tabular-nums whitespace-nowrap transition-colors font-medium",
-                  showPagePicker
-                    ? "text-workspace-accent"
-                    : "text-workspace-text-secondary/80 hover:text-workspace-text",
-                )}
-              >
-                {currentPageId
-                  ? `${currentIdx + 1}/${pages.length}p`
-                  : `${pages.length}p`}
-              </button>
-              <button
-                disabled={!nextPage}
-                onClick={() => nextPage && loadPage(nextPage.id)}
-                className="p-1 rounded text-workspace-text-secondary/70 hover:text-workspace-text hover:bg-workspace-bg/50 disabled:opacity-25 disabled:cursor-default disabled:hover:bg-transparent transition-colors"
-              >
-                <ChevronRight size={14} />
-              </button>
-            </div>
-            <StatusBadge status={chapterStatus} size="sm" />
-            {!isReviewMode && isMangaka && (
-              <button
-                onClick={() => setNewPageOpen(true)}
-                className="p-1.5 text-workspace-text-secondary hover:text-workspace-text transition-colors"
-                title="Import page"
-              >
-                <Plus size={16} />
-              </button>
-            )}
+    <div className="h-screen bg-surface flex flex-col overflow-hidden select-none">
+      {/* ── Top Toolbar (workspace.html styling) ── */}
+      <header className="h-14 bg-surface border-b border-outline-variant flex items-center justify-between px-4 z-50 flex-shrink-0">
+        {/* Left section: Brand + Chapter nav */}
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <BookOpen size={22} className="text-primary" />
+            <span className="text-[24px] font-semibold text-on-surface tracking-tight">MangaFlow</span>
           </div>
+          <div className="w-px h-8 bg-outline-variant" />
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => navigate(isReviewMode ? "/review" : `/series/${chapter.seriesId}`)}
+              className="p-1.5 rounded-lg hover:bg-surface-container-high text-on-surface-variant transition-all"
+              title="Back"
+            >
+              <ArrowLeft size={18} />
+            </button>
+          </div>
+          <span className="text-sm font-medium text-on-surface">
+            Ch.{chapter.chapterNumber}{chapter.title ? ` — ${chapter.title}` : ''}
+          </span>
+          <StatusBadge status={chapterStatus} size="sm" />
+          <div className="w-px h-6 bg-outline-variant" />
 
-          {/* Toolbar + Zoom + Reviewer actions */}
-          <div className="flex items-center gap-1.5">
-            <div className="flex items-center bg-workspace-bg border border-workspace-border rounded">
-              {currentTools.map((t) => {
-                const Icon = t.icon;
-                return (
-                  <button
-                    key={t.id}
-                    onClick={() => setMode(t.id)}
-                    disabled={currentPageId === null}
-                    className={cn(
-                      "p-2 transition-colors disabled:opacity-30 first:rounded-l last:rounded-r",
-                      mode === t.id
-                        ? "bg-workspace-accent text-white"
-                        : "text-workspace-text-secondary hover:text-workspace-text hover:bg-workspace-surface",
-                    )}
-                    title={t.label}
-                  >
-                    <Icon size={18} />
-                  </button>
-                );
-              })}
+          {/* Tool buttons */}
+          <nav className="flex items-center gap-1">
+            {currentTools.map((t) => {
+              const Icon = t.icon;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => setMode(t.id)}
+                  disabled={currentPageId === null}
+                  className={cn(
+                    "p-1.5 rounded-lg transition-all disabled:opacity-30",
+                    mode === t.id
+                      ? "bg-primary/10 text-primary border border-primary/20"
+                      : "text-on-surface-variant hover:bg-surface-container-high",
+                  )}
+                  title={t.label}
+                >
+                  <Icon size={18} />
+                </button>
+              );
+            })}
+          </nav>
+          <div className="w-px h-6 bg-outline-variant" />
+
+          {/* Save status + Undo/Redo */}
+          <div className="flex items-center gap-4 text-sm text-on-surface-variant">
+            <span className="flex items-center gap-1.5"><Cloud size={16} /> Saved</span>
+            <div className="flex items-center gap-1">
+              <button className="p-1 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><Undo2 size={16} /></button>
+              <button className="p-1 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"><Redo2 size={16} /></button>
             </div>
-            <div className="w-px h-4 bg-workspace-border" />
+          </div>
+        </div>
+
+        {/* Right section: Zoom + Upload + Avatar */}
+        <div className="flex items-center gap-4">
+          {/* Zoom control */}
+          <div className="flex items-center bg-surface-container-low px-3 py-1 rounded-full border border-outline-variant">
             <button
               onClick={() => setZoom(Math.max(0.25, zoom - 0.25))}
-              className="p-1.5 text-workspace-text-secondary hover:text-workspace-text"
-              title="Zoom out"
+              className="text-on-surface-variant hover:text-primary transition-colors"
             >
-              <ZoomOut size={16} />
+              <Minus size={16} />
             </button>
-            <span className="text-xs text-workspace-text-secondary tabular-nums w-8 text-center font-mono">
-              {Math.round(zoom * 100)}%
-            </span>
+            <span className="mx-3 text-sm font-medium min-w-[40px] text-center tabular-nums">{Math.round(zoom * 100)}%</span>
             <button
               onClick={() => setZoom(Math.min(4, zoom + 0.25))}
-              className="p-1.5 text-workspace-text-secondary hover:text-workspace-text"
-              title="Zoom in"
+              className="text-on-surface-variant hover:text-primary transition-colors"
             >
-              <ZoomIn size={16} />
+              <Plus size={16} />
             </button>
-            <button
-              onClick={() => setZoom(1)}
-              className="p-1.5 text-workspace-text-secondary hover:text-workspace-text"
-              title="Fit to screen"
-            >
-              <Maximize size={16} />
-            </button>
-            <div className="w-px h-4 bg-workspace-border" />
+          </div>
 
-            {/* Review mode actions */}
-            {isReviewMode && chapter && (
-              <>
-                {isMangaka && (
-                  <span className="text-xs text-workspace-text-secondary/60">
-                    {chapterStatus === "IN_REVIEW"
-                      ? "Awaiting Tantou review"
-                      : chapterStatus === "PENDING_BOARD_APPROVAL"
-                        ? "Submitted to Board"
-                        : ""}
-                  </span>
-                )}
-                {isTantou &&
-                  (chapterStatus === "IN_REVIEW" ||
-                    chapterStatus === "SUBMITTED") && (
-                    <>
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => {
-                            updateChapterStatus(id, "PENDING_BOARD_APPROVAL");
-                            addToast({
-                              type: "success",
-                              title: "Submitted to Board",
-                              message: `Ch.${chapter.chapterNumber} has been submitted for Editorial Board approval.`,
-                            });
-                          }}
-                          className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-status-success border border-status-success/30 hover:bg-status-success/5"
-                        >
-                          <Send size={14} /> Submit to Board
-                        </button>
-                        <button
-                          onClick={() => {
-                            updateChapterStatus(id, "REVISION_REQUIRED");
-                            addToast({
-                              type: "success",
-                              title: "Revision requested",
-                              message: `Changes requested for Ch.${chapter.chapterNumber}.`,
-                            });
-                          }}
-                          className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-status-warning border border-status-warning/30 hover:bg-status-warning/5"
-                        >
-                          <RotateCcw size={14} /> Revise
-                        </button>
-                        <button
-                          onClick={() => {
-                            updateChapterStatus(id, "REJECTED");
-                            addToast({
-                              type: "success",
-                              title: "Chapter rejected",
-                              message: `Ch.${chapter.chapterNumber} has been rejected.`,
-                            });
-                          }}
-                          className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-status-danger border border-status-danger/30 hover:bg-status-danger/5"
-                        >
-                          <X size={14} /> Reject
-                        </button>
-                      </div>
-                      <div className="w-px h-4 bg-workspace-border" />
-                    </>
-                  )}
-                {isEb && chapterStatus === "PENDING_BOARD_APPROVAL" && (
+          {/* Upload Page button */}
+          {!isReviewMode && isMangaka && (
+            <button
+              onClick={() => setNewPageOpen(true)}
+              className="bg-primary text-on-primary px-4 py-1.5 rounded-full text-sm font-medium hover:brightness-110 active:scale-95 transition-all flex items-center gap-2 shadow-sm"
+            >
+              <Upload size={18} />
+              Upload Page
+            </button>
+          )}
+
+          {/* User avatar */}
+          <div className="flex items-center gap-2 pl-2">
+            <div className="w-8 h-8 rounded-full bg-primary-container/20 flex items-center justify-center text-primary font-bold text-xs ring-2 ring-primary/20">
+              {user?.displayName?.charAt(0)?.toUpperCase() || 'U'}
+            </div>
+          </div>
+
+          {/* Review mode actions */}
+          {isReviewMode && chapter && (
+            <>
+              {isMangaka && (
+                <span className="text-xs text-on-surface-variant/60">
+                  {chapterStatus === "IN_REVIEW"
+                    ? "Awaiting Tantou review"
+                    : chapterStatus === "PENDING_BOARD_APPROVAL"
+                      ? "Submitted to Board"
+                      : ""}
+                </span>
+              )}
+              {isTantou &&
+                (chapterStatus === "IN_REVIEW" ||
+                  chapterStatus === "SUBMITTED") && (
                   <>
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => {
-                          updateChapterStatus(id, "APPROVED");
+                          updateChapterStatus(id, "PENDING_BOARD_APPROVAL");
                           addToast({
                             type: "success",
-                            title: "Chapter approved",
-                            message: `Ch.${chapter.chapterNumber} has been approved.`,
+                            title: "Submitted to Board",
+                            message: `Ch.${chapter.chapterNumber} has been submitted for Editorial Board approval.`,
                           });
                         }}
-                        className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-status-success border border-status-success/30 hover:bg-status-success/5"
+                        className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-status-success border border-status-success/30 hover:bg-status-success/5 rounded-lg"
                       >
-                        <Check size={14} /> Approve
+                        <Send size={14} /> Submit to Board
+                      </button>
+                      <button
+                        onClick={() => {
+                          updateChapterStatus(id, "REVISION_REQUIRED");
+                          addToast({
+                            type: "success",
+                            title: "Revision requested",
+                            message: `Changes requested for Ch.${chapter.chapterNumber}.`,
+                          });
+                        }}
+                        className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-status-warning border border-status-warning/30 hover:bg-status-warning/5 rounded-lg"
+                      >
+                        <RotateCcw size={14} /> Revise
                       </button>
                       <button
                         onClick={() => {
@@ -511,112 +446,210 @@ export function WorkspacePage() {
                             message: `Ch.${chapter.chapterNumber} has been rejected.`,
                           });
                         }}
-                        className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-status-danger border border-status-danger/30 hover:bg-status-danger/5"
+                        className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-status-danger border border-status-danger/30 hover:bg-status-danger/5 rounded-lg"
                       >
                         <X size={14} /> Reject
                       </button>
                     </div>
-                    <div className="w-px h-4 bg-workspace-border" />
                   </>
                 )}
-              </>
-            )}
-
-            {!isReviewMode && isMangaka && leftPanelBtn}
-            {rightPanelBtn}
-          </div>
-        </div>
-
-        {/* Page picker dropdown (chỉ workspace mode) */}
-        {showPagePicker && !isReviewMode && (
-          <div className="absolute top-full left-0 right-0 z-50 bg-workspace-surface border-b border-workspace-border shadow-lg">
-            <div className="flex items-center gap-1.5 px-2 py-1.5 overflow-x-auto">
-              {isMangaka && (
-                <button
-                  onClick={() => {
-                    setNewPageOpen(true);
-                    setShowPagePicker(false);
-                  }}
-                  className="flex-shrink-0 w-8 aspect-[3/4] border border-dashed border-workspace-border/40 flex items-center justify-center text-workspace-text-secondary/40 hover:text-workspace-text hover:border-workspace-accent/60 transition-all rounded"
-                  title="Add page"
-                >
-                  <Plus size={10} />
-                </button>
+              {isEb && chapterStatus === "PENDING_BOARD_APPROVAL" && (
+                <>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => {
+                        updateChapterStatus(id, "APPROVED");
+                        addToast({
+                          type: "success",
+                          title: "Chapter approved",
+                          message: `Ch.${chapter.chapterNumber} has been approved.`,
+                        });
+                      }}
+                      className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-status-success border border-status-success/30 hover:bg-status-success/5 rounded-lg"
+                    >
+                      <Check size={14} /> Approve
+                    </button>
+                    <button
+                      onClick={() => {
+                        updateChapterStatus(id, "REJECTED");
+                        addToast({
+                          type: "success",
+                          title: "Chapter rejected",
+                          message: `Ch.${chapter.chapterNumber} has been rejected.`,
+                        });
+                      }}
+                      className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-status-danger border border-status-danger/30 hover:bg-status-danger/5 rounded-lg"
+                    >
+                      <X size={14} /> Reject
+                    </button>
+                  </div>
+                </>
               )}
-              {pages.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => {
-                    loadPage(p.id);
-                    setShowPagePicker(false);
-                  }}
-                  className={cn(
-                    "flex-shrink-0 w-8 aspect-[3/4] flex flex-col items-center justify-center border rounded text-[8px] font-medium transition-all",
-                    p.id === currentPageId
-                      ? "border-workspace-accent bg-workspace-accent/10 text-workspace-accent"
-                      : "border-workspace-border/30 text-workspace-text-secondary/60 hover:border-workspace-border/60 hover:text-workspace-text",
-                  )}
-                >
-                  {p.originalImageUrl ? (
-                    <img
-                      src={p.originalImageUrl}
-                      alt=""
-                      className="w-full h-full object-cover rounded"
-                    />
-                  ) : (
-                    <>
-                      <ImageIcon size={8} className="mb-px" />
-                      <span>{p.pageNumber}</span>
-                    </>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+            </>
+          )}
+        </div>
+      </header>
 
       {/* ── Main area ── */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left sidebar — Layers (MANGAKA only, workspace mode) */}
+        {/* Left Panel — Pages/Layers (workspace.html styling) */}
+
+        {/* Right panel toggle button — always visible on the left edge */}
+        {!showLeftPanel && !isReviewMode && isMangaka && (
+          <button
+            onClick={() => setShowLeftPanel(true)}
+            className="flex-shrink-0 w-6 bg-surface-container-low border-r border-outline-variant flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors"
+            title="Show Pages"
+          >
+            <ChevronRight size={14} />
+          </button>
+        )}
+
         {showLeftPanel && !isReviewMode && isMangaka && (
-          <div className="w-64 flex-shrink-0 bg-workspace-surface border-r border-workspace-border flex flex-col overflow-hidden">
-            <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+          <aside className="w-64 flex-shrink-0 bg-surface-container-low border-r border-outline-variant flex flex-col overflow-hidden">
+            {/* Pages/Layers tabs */}
+            <div className="flex border-b border-outline-variant flex-shrink-0">
               <button
-                onClick={() => setLayerExpanded(!layerExpanded)}
-                className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-workspace-text-secondary hover:text-workspace-text transition-colors flex-shrink-0"
+                onClick={() => setLeftPanelTab('pages')}
+                className={cn(
+                  "flex-1 py-3 text-sm font-medium transition-colors",
+                  leftPanelTab === 'pages'
+                    ? "text-primary border-b-2 border-primary"
+                    : "text-on-surface-variant hover:text-on-surface",
+                )}
               >
-                Layers{" "}
-                <span className="text-[9px] font-normal text-workspace-text-secondary/40 ml-auto">
-                  {layers.length}
-                </span>
+                Pages
               </button>
-              {layerExpanded && (
-                <div className="flex-1 overflow-y-auto scrollbar-thin px-1 pb-1">
-                  <LayerPanel />
-                </div>
-              )}
+              <button
+                onClick={() => setLeftPanelTab('layers')}
+                className={cn(
+                  "flex-1 py-3 text-sm font-medium transition-colors",
+                  leftPanelTab === 'layers'
+                    ? "text-primary border-b-2 border-primary"
+                    : "text-on-surface-variant hover:text-on-surface",
+                )}
+              >
+                Layers
+              </button>
             </div>
-          </div>
+
+            {/* Pages tab */}
+            {leftPanelTab === 'pages' && (
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors}>
+                  <SortableContext items={pages.map((p) => p.id)} strategy={verticalListSortingStrategy}>
+                    {pages.map((p) => (
+                      <SortablePageCard
+                        key={p.id}
+                        page={p}
+                        isActive={p.id === currentPageId}
+                        onClick={() => loadPage(p.id)}
+                        isMangaka={isMangaka}
+                      />
+                    ))}
+                  </SortableContext>
+                </DndContext>
+
+                {/* Add Page button */}
+                {isMangaka && (
+                  <div
+                    onClick={() => setNewPageOpen(true)}
+                    className="group relative cursor-pointer hover:bg-surface-container-high rounded-lg overflow-hidden transition-all"
+                  >
+                    <div className="w-full aspect-[210/297] bg-surface-container-highest/20 flex flex-col items-center justify-center border border-dashed border-outline-variant rounded-lg">
+                      <Plus size={24} className="text-outline" />
+                      <span className="text-xs text-outline mt-2">Add Page</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Project Status */}
+                <div className="pt-4 border-t border-outline-variant">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Project Status</span>
+                    <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs font-medium">
+                      <span className="text-on-surface-variant">Regions Labeled</span>
+                      <span className="text-on-surface">{completedRegions}/{regionCount}</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-surface-variant rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded-full transition-all"
+                        style={{ width: `${regionCount > 0 ? (completedRegions / regionCount) * 100 : 0}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Layers tab */}
+            {leftPanelTab === 'layers' && (
+              <div className="flex-1 overflow-y-auto p-2">
+                <LayerPanel />
+              </div>
+            )}
+          </aside>
         )}
 
         {/* Canvas */}
-        <div className="flex-1 relative overflow-hidden bg-workspace-canvas-bg min-w-0">
+        <div className="flex-1 relative overflow-hidden min-w-0"
+          style={{
+            backgroundImage: 'radial-gradient(circle, #2a2a2c 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
+            backgroundColor: '#0e0e10',
+          }}
+        >
           {currentPageId ? (
             <WorkspaceCanvas />
           ) : (
             <div className="flex items-center justify-center h-full">
-              <p className="text-sm text-workspace-text-secondary/60">
-                Select a page
-              </p>
+              <p className="text-sm text-on-surface-variant/60">Select a page</p>
             </div>
           )}
+
+          {/* Floating Zoom Control (workspace.html styling) */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-1 p-1.5 bg-surface-container-highest/90 backdrop-blur-md rounded-xl border border-outline-variant shadow-2xl">
+            <button
+              onClick={() => setZoom(Math.max(0.25, zoom - 0.25))}
+              className="p-2 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"
+            >
+              <ZoomOut size={16} />
+            </button>
+            <div className="w-px h-4 bg-outline-variant mx-1" />
+            <button
+              onClick={() => setZoom(1)}
+              className="px-4 py-1 text-sm font-bold hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"
+            >
+              Fit To Screen
+            </button>
+            <div className="w-px h-4 bg-outline-variant mx-1" />
+            <button
+              onClick={() => setZoom(Math.min(4, zoom + 0.25))}
+              className="p-2 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"
+            >
+              <ZoomIn size={16} />
+            </button>
+          </div>
         </div>
 
-        {/* Right panel */}
+        {/* Right panel toggle */}
+        {!showRightPanel && (
+          <button
+            onClick={() => setShowRightPanel(true)}
+            className="flex-shrink-0 w-6 bg-surface-container-low border-l border-outline-variant flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors"
+            title="Show panel"
+          >
+            <ChevronLeft size={14} />
+          </button>
+        )}
+
+        {/* Right panel — Regions/Tasks/Comments */}
         {showRightPanel && (
-          <div className="w-64 flex-shrink-0 bg-workspace-surface border-l border-workspace-border flex flex-col overflow-hidden">
-            <div className="flex border-b border-workspace-border flex-shrink-0">
+          <aside className="w-80 flex-shrink-0 bg-surface-container-low border-l border-outline-variant flex flex-col overflow-hidden">
+            <div className="flex border-b border-outline-variant flex-shrink-0">
               {currentTabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
@@ -624,25 +657,24 @@ export function WorkspacePage() {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={cn(
-                      "flex-1 flex items-center justify-center gap-1 py-2 text-[10px] font-medium transition-colors relative",
+                      "flex-1 py-3 text-sm font-medium transition-colors",
                       activeTab === tab.id
-                        ? "text-workspace-text"
-                        : "text-workspace-text-secondary hover:text-workspace-text",
+                        ? "text-primary border-b-2 border-primary"
+                        : "text-on-surface-variant hover:text-on-surface",
                     )}
                   >
-                    <Icon size={11} />
-                    <span>{tab.label}</span>
-                    {activeTab === tab.id && (
-                      <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-workspace-accent rounded-full" />
-                    )}
+                    <div className="flex items-center justify-center gap-1.5">
+                      <Icon size={14} />
+                      <span>{tab.label}</span>
+                    </div>
                   </button>
                 );
               })}
             </div>
-            <div className="flex-1 overflow-y-auto scrollbar-thin">
+            <div className="flex-1 overflow-y-auto">
               {ActiveComponent && <ActiveComponent />}
             </div>
-          </div>
+          </aside>
         )}
       </div>
 
@@ -662,4 +694,50 @@ export function WorkspacePage() {
       )}
     </div>
   );
+}
+
+function SortablePageCard({ page, isActive, onClick, isMangaka }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: page.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...(isMangaka ? listeners : {})}
+      {...(isMangaka ? attributes : {})}
+      onClick={onClick}
+      className={cn(
+        "group relative rounded-lg overflow-hidden transition-all cursor-pointer",
+        isActive ? "ring-2 ring-primary" : "hover:ring-2 hover:ring-outline",
+        isDragging ? "opacity-40 z-50" : "",
+      )}
+    >
+      {page.originalImageUrl ? (
+        <img
+          src={page.originalImageUrl}
+          alt={`Page ${page.pageNumber}`}
+          className="w-full aspect-[210/297] object-cover group-hover:scale-105 transition-transform duration-500"
+        />
+      ) : (
+        <div className="w-full aspect-[210/297] bg-surface-container-highest/20 flex flex-col items-center justify-center">
+          <ImageIcon size={24} className="text-outline" />
+        </div>
+      )}
+      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+        <span className="text-xs font-bold text-white">
+          {page.label || `Page ${String(page.pageNumber).padStart(2, '0')}`}
+        </span>
+      </div>
+      {isActive && (
+        <div className="absolute top-2 right-2 bg-primary text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
+          ACTIVE
+        </div>
+      )}
+    </div>
+  )
 }

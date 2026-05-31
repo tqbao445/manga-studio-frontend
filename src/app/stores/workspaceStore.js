@@ -173,6 +173,16 @@ export const useWorkspaceStore = create((set) => ({
     }
   }),
 
+  reorderPages: (pageIds) => set((s) => {
+    const reordered = pageIds
+      .map((id, i) => {
+        const page = s.pages.find((p) => p.id === id)
+        return page ? { ...page, pageNumber: i + 1 } : null
+      })
+      .filter(Boolean)
+    return { pages: reordered }
+  }),
+
   addAnnotation: (annotation) => set((s) => ({
     annotations: [...s.annotations, annotation],
   })),

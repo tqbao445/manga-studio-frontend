@@ -2,44 +2,36 @@ import { useState, useCallback } from 'react'
 import { cn } from '../../utils'
 import { useWorkspaceStore } from '../../../app/stores/workspaceStore'
 import { useUIStore } from '../../../app/stores/uiStore'
-import { Check, Clock, AlertCircle } from 'lucide-react'
+import { User, Image, Type, Zap, Palette, Square, MoreVertical, Check, Clock, AlertCircle } from 'lucide-react'
 import { REGION_COLORS } from '../../constants'
 
-/*
- * ===== RegionPanel Component =====
- * Mục đích: Panel hiển thị danh sách các region (vùng đánh dấu) trên trang.
- * Mỗi region có: nhãn, loại (BACKGROUND, CHARACTER, TEXT, EFFECT, TONE, OTHER),
- * trạng thái (PENDING, IN_PROGRESS, COMPLETED, APPROVED).
- * Khi chọn một region, hiển thị form chỉnh sửa label và type.
- * =================================
- */
-
-// Map icon theo trạng thái region
 const statusIcons = {
   APPROVED: Check,
   COMPLETED: Check,
+  SUBMITTED: Check,
   IN_PROGRESS: Clock,
   PENDING: AlertCircle,
 }
 
-// Nhãn hiển thị cho từng trạng thái
 const statusLabels = {
   PENDING: 'Pending',
   IN_PROGRESS: 'In Progress',
   COMPLETED: 'Completed',
   APPROVED: 'Approved',
+  SUBMITTED: 'Submitted',
 }
 
-// Danh sách loại region
 const REGION_TYPES = ['BACKGROUND', 'CHARACTER', 'TEXT', 'EFFECT', 'TONE', 'OTHER']
 
-/**
- * Component chính: danh sách region với expand form chỉnh sửa
- * Luồng xử lý:
- *   - Click region: chọn/bỏ chọn, hiển thị form edit
- *   - Edit label: nhập và blur/Enter để lưu
- *   - Edit type: click vào type chip để thay đổi
- */
+const typeIcons = {
+  BACKGROUND: Image,
+  CHARACTER: User,
+  TEXT: Type,
+  EFFECT: Zap,
+  TONE: Palette,
+  OTHER: Square,
+}
+
 export function RegionPanel() {
   const regions = useWorkspaceStore((s) => s.regions)
   const selectedRegionId = useWorkspaceStore((s) => s.selectedRegionId)
@@ -50,9 +42,6 @@ export function RegionPanel() {
 
   const selectedRegion = regions.find(r => r.id === selectedRegionId)
 
-  /**
-   * Lưu label mới khi blur khỏi input
-   */
   const handleLabelSave = useCallback((region) => {
     if (editLabel.trim() && editLabel !== region.label) {
       updateRegion(region.id, { label: editLabel.trim() })
@@ -60,112 +49,124 @@ export function RegionPanel() {
     }
   }, [editLabel, updateRegion, addToast])
 
-  /**
-   * Thay đổi loại region và thông báo
-   */
   const handleTypeChange = useCallback((region, type) => {
     updateRegion(region.id, { regionType: type })
     addToast({ title: `Type changed to ${type}`, variant: 'info' })
   }, [updateRegion, addToast])
 
-  // Trạng thái rỗng
   if (regions.length === 0) {
     return (
       <div className="py-8 text-center">
-        <p className="text-xs text-workspace-text-secondary">No regions defined — select Draw tool on canvas to create regions</p>
+        <p className="text-xs text-on-surface-variant/60">No regions defined — select Region tool on canvas to create regions</p>
       </div>
     )
   }
 
   return (
-    <div className="space-y-1 px-2 pt-3">
-      {/* Tiêu đề panel */}
-      <div className="px-1 text-[10px] font-semibold uppercase tracking-wider text-workspace-text-secondary pb-1">
-        Regions ({regions.length})
+    <div className="p-4 space-y-4">
+      <div className="space-y-2">
+        <h4 className="text-sm font-bold text-on-surface flex items-center justify-between">
+          Regions
+          <span className="text-on-surface-variant font-medium text-xs">{regions.length} Total</span>
+        </h4>
+
+        <div className="space-y-2">
+          {regions.map((r) => {
+            const TypeIcon = typeIcons[r.regionType] || Square
+            const StatusIcon = statusIcons[r.status] || AlertCircle
+            const color = REGION_COLORS[r.regionType] || '#6b7280'
+            const isSelected = selectedRegionId === r.id
+
+            const statusColorClass = {
+              APPROVED: 'text-status-success',
+              COMPLETED: 'text-status-success',
+              SUBMITTED: 'text-primary',
+              IN_PROGRESS: 'text-status-warning',
+              PENDING: 'text-on-surface-variant',
+            }[r.status] || 'text-on-surface-variant'
+
+            return (
+              <div key={r.id}>
+                <div
+                  onClick={() => {
+                    selectRegion(isSelected ? null : r.id)
+                    if (!isSelected) setEditLabel(r.label || '')
+                  }}
+                  className={cn(
+                    'group flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all border',
+                    isSelected
+                      ? 'bg-surface-container border-primary/50'
+                      : 'bg-surface-container-lowest border-outline-variant/30 hover:border-primary/50',
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-9 h-9 rounded-lg flex items-center justify-center border"
+                      style={{
+                        backgroundColor: `${color}1a`,
+                        borderColor: `${color}33`,
+                      }}
+                    >
+                      <TypeIcon size={20} style={{ color }} />
+                    </div>
+                    <div>
+                      <div className="text-sm font-bold text-on-surface">{r.label || r.regionType}</div>
+                      <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-tighter">
+                        <span style={{ color }}>{r.regionType}</span>
+                        <span className="text-on-surface-variant font-medium normal-case">·</span>
+                        <span className={cn('flex items-center gap-1 font-medium normal-case', statusColorClass)}>
+                          <StatusIcon size={11} />
+                          {statusLabels[r.status] || r.status}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <MoreVertical size={16} className="text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+
+                {isSelected && (
+                  <div className="px-4 pb-3 pt-2 space-y-2 bg-surface-container-lowest border-x border-b border-outline-variant/30 rounded-b-xl -mt-1">
+                    <div>
+                      <label className="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant block mb-1">Label</label>
+                      <input
+                        value={editLabel}
+                        onChange={(e) => setEditLabel(e.target.value)}
+                        onBlur={() => handleLabelSave(r)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.target.blur() } }}
+                        className="w-full h-8 px-2.5 text-sm bg-surface-container-low border border-outline-variant/30 outline-none focus:border-primary text-on-surface rounded-lg placeholder:text-on-surface-variant/40"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant block mb-1">Type</label>
+                      <div className="flex flex-wrap gap-1.5">
+                        {REGION_TYPES.map((t) => {
+                          const tc = REGION_COLORS[t]
+                          const isActive = r.regionType === t
+                          return (
+                            <button
+                              key={t}
+                              onClick={() => handleTypeChange(r, t)}
+                              className={cn(
+                                'text-xs px-2.5 py-1 rounded-lg border transition-all',
+                                isActive
+                                  ? 'border-primary text-on-surface font-semibold bg-primary/5'
+                                  : 'border-outline-variant/30 text-on-surface-variant hover:text-on-surface hover:border-outline-variant',
+                              )}
+                            >
+                              <span className="inline-block w-2 h-2 mr-1.5 align-middle rounded-sm" style={{ background: tc }} />
+                              {t}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
       </div>
-
-      {regions.map((r) => {
-        const color = REGION_COLORS[r.regionType] || '#6b7280'
-        const StatusIcon = statusIcons[r.status] || AlertCircle
-        const isSelected = selectedRegionId === r.id
-        return (
-          <div key={r.id}>
-            {/* Nút region: hiển thị tên, trạng thái, task */}
-            <button
-              onClick={() => {
-                selectRegion(isSelected ? null : r.id)
-                if (!isSelected) setEditLabel(r.label || '')
-              }}
-              className={cn(
-                'w-full text-left px-3 py-2 text-xs border-l-[3px] transition-colors rounded hover:bg-workspace-bg/50',
-                isSelected ? 'bg-workspace-bg/70' : 'border-transparent',
-              )}
-              style={{ borderLeftColor: isSelected ? color : 'transparent' }}
-            >
-              <div className="flex items-center gap-2">
-                {/* Màu của region type */}
-                <span className="w-2 h-2 flex-shrink-0 rounded-sm" style={{ background: color }} />
-                {/* Tên region */}
-                <span className="flex-1 font-medium text-workspace-text truncate text-[11px]">{r.label || r.regionType}</span>
-                {/* Icon + label trạng thái */}
-                <span className={cn(
-                  'flex items-center gap-0.5 text-[10px]',
-                  r.status === 'APPROVED' ? 'text-status-success' : 'text-workspace-text-secondary',
-                )}>
-                  <StatusIcon size={10} />
-                  {statusLabels[r.status] || r.status}
-                </span>
-              </div>
-              {}
-            </button>
-
-            {/* Form chỉnh sửa (chỉ hiển thị khi region được chọn) */}
-            {isSelected && (
-              <div className="px-3 pb-2 space-y-2">
-                {/* Edit label */}
-                <div>
-                  <label className="text-[9px] font-semibold uppercase tracking-wider text-workspace-text-secondary block mb-0.5">Label</label>
-                  <div className="flex gap-1">
-                    <input
-                      value={editLabel}
-                      onChange={(e) => setEditLabel(e.target.value)}
-                      onBlur={() => handleLabelSave(r)}
-                      onKeyDown={(e) => { if (e.key === 'Enter') { e.target.blur() } }}
-                      className="flex-1 h-6 px-1.5 text-[11px] bg-workspace-bg border border-workspace-border outline-none focus:border-workspace-accent text-workspace-text rounded"
-                    />
-                  </div>
-                </div>
-
-                {/* Edit type: các chip chọn loại region */}
-                <div>
-                  <label className="text-[9px] font-semibold uppercase tracking-wider text-workspace-text-secondary block mb-0.5">Type</label>
-                  <div className="flex flex-wrap gap-1">
-                    {REGION_TYPES.map((t) => {
-                      const tc = REGION_COLORS[t]
-                      return (
-                        <button
-                          key={t}
-                          onClick={() => handleTypeChange(r, t)}
-                          className={cn(
-                            'text-[10px] px-2 py-0.5 border rounded transition-colors',
-                            r.regionType === t
-                              ? 'border-workspace-text font-semibold text-workspace-text'
-                              : 'border-transparent text-workspace-text-secondary hover:text-workspace-text',
-                          )}
-                          style={r.regionType === t ? { borderColor: tc } : undefined}
-                        >
-                          <span className="inline-block w-1.5 h-1.5 mr-1 align-middle rounded-sm" style={{ background: tc }} />
-                          {t}
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )
-      })}
     </div>
   )
 }
