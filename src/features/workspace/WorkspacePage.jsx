@@ -1005,9 +1005,9 @@ function SortablePageCard({ page, isActive, onClick, isMangaka }) {
         isDragging ? "opacity-40 z-50" : "",
       )}
     >
-      {page.originalImageUrl ? (
+      {(page.finalImageUrl || page.originalImageUrl) ? (
         <img
-          src={page.originalImageUrl}
+          src={page.finalImageUrl || page.originalImageUrl}
           alt={`Page ${page.pageNumber}`}
           className="w-full aspect-[210/297] object-cover group-hover:scale-105 transition-transform duration-500"
         />
