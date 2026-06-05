@@ -36,21 +36,22 @@ let annotationIdCounter = 99000;
 /**
  * Custom hook: tải ảnh trang từ URL
  * @param {string} src - URL của ảnh
- * @returns {HTMLImageElement|undefined} - đối tượng ảnh sau khi load
+ * @returns {{ image: HTMLImageElement|undefined, error: boolean }} - đối tượng ảnh + trạng thái lỗi
  */
 function usePageImage(src) {
-  const [img, setImg] = useState(undefined);
+  const [state, setState] = useState({ image: undefined, error: false });
   useEffect(() => {
     if (!src) {
-      setImg(undefined);
+      setState({ image: undefined, error: false });
       return;
     }
+    setState({ image: undefined, error: false });
     const el = new window.Image();
-    el.onload = () => setImg(el);
-    el.onerror = () => setImg(undefined);
+    el.onload = () => setState({ image: el, error: false });
+    el.onerror = () => setState({ image: undefined, error: true });
     el.src = src;
   }, [src]);
-  return img;
+  return state;
 }
 
 /**
@@ -58,7 +59,7 @@ function usePageImage(src) {
  * Layer là các lớp overlay chồng lên trang, có độ trong suốt riêng.
  */
 function LayerImage({ layer, pw, ph }) {
-  const img = usePageImage(layer.fileUrl || undefined);
+  const { image: img } = usePageImage(layer.fileUrl || undefined);
   if (layer.fileUrl && img) {
     return (
       <KonvaImage
@@ -126,6 +127,7 @@ export function WorkspaceCanvas() {
   const addAnnotation = useWorkspaceStore((s) => s.addAnnotation);
   const deleteAnnotation = useWorkspaceStore((s) => s.deleteAnnotation);
   const hiddenRegionIds = useWorkspaceStore((s) => s.hiddenRegionIds);
+  const mergeResult = useWorkspaceStore((s) => s.mergeResult);
 
   const visibleRegions = regions.filter((r) => !hiddenRegionIds.includes(r.id));
   const user = useAuthStore((s) => s.user);
@@ -151,9 +153,10 @@ export function WorkspaceCanvas() {
   const selectedComment = allComments.find((c) => c.id === selectedCommentId);
 
   const page = pages.find((p) => p.id === currentPageId);
-  const pageImage = usePageImage(
-    page?.originalImageUrl || page?.webImageUrl || undefined,
-  );
+  const [mergeFallback, setMergeFallback] = useState(false);
+  useEffect(() => { setMergeFallback(false); }, [mergeResult]);
+  const pageImageUrl = (!mergeFallback && mergeResult) || (!mergeFallback && page?.finalImageUrl) || page?.originalImageUrl || page?.webImageUrl || undefined;
+  const { image: pageImage, error: pageImageError } = usePageImage(pageImageUrl);
   const pw = page?.width || pageImage?.naturalWidth || 4200;
   const ph = page?.height || pageImage?.naturalHeight || 6000;
 
@@ -206,6 +209,13 @@ export function WorkspaceCanvas() {
     tr.nodes([]);
     tr.getLayer()?.batchDraw();
   }, [selectedRegionId, regions, mode]);
+
+  // Fallback: nếu merge image load lỗi (404), quay về originalImageUrl
+  useEffect(() => {
+    if (pageImageError && mergeResult && !mergeFallback) {
+      setMergeFallback(true);
+    }
+  }, [pageImageError, mergeResult, mergeFallback]);
 
   /**
    * Lấy tọa độ chuột tương đối so với Stage (đã tính scale)

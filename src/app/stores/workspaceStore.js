@@ -500,7 +500,12 @@ export const useWorkspaceStore = create((set, get) => ({
     try {
       const result = await pageService.merge(pageId);
       const finalImageUrl = result?.finalImageUrl || result?.imageUrl || '';
-      set({ mergeResult: finalImageUrl });
+      set((s) => ({
+        pages: s.pages.map((p) =>
+          p.id === pageId ? { ...p, finalImageUrl } : p
+        ),
+        mergeResult: finalImageUrl,
+      }));
       return finalImageUrl;
     } catch (err) {
       console.error('[workspaceStore] mergePage failed:', err);

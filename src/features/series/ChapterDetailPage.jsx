@@ -493,8 +493,8 @@ function SortablePageCard({ page, chapterId, isMangaka, onDelete }) {
         )}
 
         {/* Thumbnail */}
-        {page.thumbnailUrl ? (
-          <img src={page.thumbnailUrl} alt={`Page ${page.pageNumber}`} className="w-full h-full object-cover grayscale opacity-80 group-hover:opacity-100 transition-opacity" />
+        {(page.finalImageUrl || page.thumbnailUrl || page.originalImageUrl) ? (
+          <img src={page.finalImageUrl || page.thumbnailUrl || page.originalImageUrl} alt={`Page ${page.pageNumber}`} className="w-full h-full object-cover grayscale opacity-80 group-hover:opacity-100 transition-opacity" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <Image size={32} className="text-on-surface-variant/20" />
