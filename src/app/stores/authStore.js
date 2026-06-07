@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import authService from '../../services/authService'
 import { connectWebSocket, disconnectWebSocket } from '../../services/websocket'
+import { useNotificationStore } from './notificationStore'
 
 /**
  * ─────────────────────────────────────────────
@@ -85,7 +86,7 @@ const handleWebSocketMessage = (type, data) => {
 
     // ── Tantou events ──
     case 'TANTOU_INVITATION_SENT':
-      // TANTOU_EDITOR: có lời m?i làm tantou m?i → tăng invitationTrigger
+      // TANTOU_EDITOR: có lời mời làm tantou mới → tăng invitationTrigger
       useAuthStore.getState().incrementInvitationTrigger()
       break
 
@@ -94,8 +95,13 @@ const handleWebSocketMessage = (type, data) => {
     case 'TANTOU_REVIEW_REQUIRED':
     case 'TANTOU_APPROVED':
     case 'TANTOU_REJECTED':
-      // MANGAKA / TANTOU: series có thay d?i → tăng tantouTrigger d? refetch
+      // MANGAKA / TANTOU: series có thay đổi → tăng tantouTrigger để refetch
       useAuthStore.getState().incrementTantouTrigger()
+      break
+
+    case 'NOTIFICATION':
+      // Nhận notification realtime từ backend → thêm vào notificationStore
+      useNotificationStore.getState().addNotification(data)
       break
 
     default:

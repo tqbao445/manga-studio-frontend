@@ -3,7 +3,7 @@ import {
   mockSeries, mockChapters, mockPages, mockRegions, mockTasks,
   mockTaskSubmissions, mockTaskAttachments, mockLayers, mockComments,
   mockAnnotations, mockRankings, mockDashboardStats,
-  mockActivities, mockNotifications, mockSchedules, mockUsers,
+  mockActivities, mockSchedules, mockUsers,
   mockBoardVotes,
 } from '../constants/mock-data'
 import { useTaskStore } from '../../app/stores/taskStore'
@@ -98,10 +98,6 @@ export function useDashboardStats(userId) {
 
 export function useActivities() {
   return useAsyncData(() => delay(mockActivities), [])
-}
-
-export function useNotifications() {
-  return useAsyncData(() => delay(mockNotifications), [])
 }
 
 export function useSchedules() {

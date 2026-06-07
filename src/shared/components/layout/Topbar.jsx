@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Bell, User, LogOut } from "lucide-react";
 import { cn } from "../../utils";
 import { useAuthStore } from "../../../app/stores/authStore";
-import { useNotifications } from "../../hooks/useMockData";
+import { useNotificationStore } from "../../../app/stores/notificationStore";
 import { NotificationsPanel } from "./NotificationsPanel";
 
 const breadcrumbMap = {
@@ -21,8 +21,7 @@ export function Topbar() {
   const location = useLocation();
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
-  const { data: notifications } = useNotifications();
-  const unreadCount = (notifications || []).filter((n) => !n.isRead).length;
+  const { unreadCount, fetchUnreadCount } = useNotificationStore();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [profileAnim, setProfileAnim] = useState(false);
@@ -39,6 +38,10 @@ export function Topbar() {
     setProfileAnim(false);
     setTimeout(() => setShowProfileMenu(false), 200);
   }, []);
+
+  useEffect(() => {
+    fetchUnreadCount()
+  }, [])
 
   useEffect(() => {
     if (!showProfileMenu && !showNotifications) return;
