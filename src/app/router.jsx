@@ -36,6 +36,9 @@ import { ProfilePage } from "../features/profile/ProfilePage";
 import { InvitationsPage } from "../features/invitations/InvitationsPage";
 import { TantouInvitationsPage } from "../features/invitations/TantouInvitationsPage";
 import { NotFoundPage } from "../features/not-found/NotFoundPage";
+import { EditorialBoardPage } from "../features/editorial/pages/EditorialBoardPage";
+import { VotingPage } from "../features/editorial/pages/VotingPage";
+import { VotingResultsPage } from "../features/editorial/pages/VotingResultsPage";
 import { ProtectedRoute, RoleGuard } from "./guards";
 
 export default function App() {
@@ -54,7 +57,9 @@ export default function App() {
           path="/workspace/:chapterId/:pageId?"
           element={
             <ProtectedRoute>
-              <RoleGuard allowedRoles={["MANGAKA", "ASSISTANT", "TANTOU_EDITOR"]}>
+              <RoleGuard
+                allowedRoles={["MANGAKA", "ASSISTANT", "TANTOU_EDITOR"]}
+              >
                 <WorkspacePage />
               </RoleGuard>
             </ProtectedRoute>
@@ -171,6 +176,35 @@ export default function App() {
             element={
               <RoleGuard allowedRoles={["TANTOU_EDITOR", "EDITORIAL_BOARD"]}>
                 <ReviewsPage />
+              </RoleGuard>
+            }
+          />
+
+          {/* ─── Editorial Board Meetings ─── */}
+          {/* Danh sách cuộc họp — EDITORIAL_BOARD */}
+          <Route
+            path="/editorial"
+            element={
+              <RoleGuard allowedRoles={["EDITORIAL_BOARD"]}>
+                <EditorialBoardPage />
+              </RoleGuard>
+            }
+          />
+          {/* Trang bỏ phiếu — EDITORIAL_BOARD, meeting phải ở trạng thái PENDING */}
+          <Route
+            path="/editorial/:meetingId/vote"
+            element={
+              <RoleGuard allowedRoles={["EDITORIAL_BOARD"]}>
+                <VotingPage />
+              </RoleGuard>
+            }
+          />
+          {/* Trang kết quả vote — EDITORIAL_BOARD, meeting phải ở trạng thái COMPLETED */}
+          <Route
+            path="/editorial/:meetingId/results"
+            element={
+              <RoleGuard allowedRoles={["EDITORIAL_BOARD"]}>
+                <VotingResultsPage />
               </RoleGuard>
             }
           />
