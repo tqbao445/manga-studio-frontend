@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MangaFlow | Vote Results Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
+        
+        body {
+            font-family: 'Geist', sans-serif;
+            background-color: #131315;
+            color: #e5e1e4;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: rgba(27, 27, 29, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(73, 68, 84, 0.3);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #131315;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #494454;
+            border-radius: 10px;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#353437",
+                        "surface-container-lowest": "#0e0e10",
+                        "tertiary-fixed-dim": "#d4c86f",
+                        "tertiary-container": "#d4c86f",
+                        "surface-tint": "#d0bcff",
+                        "on-primary-fixed": "#210f48",
+                        "on-tertiary": "#363100",
+                        "on-secondary-fixed-variant": "#474649",
+                        "on-error-container": "#ffdad6",
+                        "outline-variant": "#494454",
+                        "surface-container-high": "#2a2a2c",
+                        "primary-container": "#d0bcff",
+                        "tertiary-fixed": "#f1e588",
+                        "primary-fixed": "#e9ddff",
+                        "on-secondary-fixed": "#1b1b1d",
+                        "on-primary": "#37265e",
+                        "tertiary": "#f1e488",
+                        "inverse-on-surface": "#303032",
+                        "error": "#ffb4ab",
+                        "inverse-primary": "#665590",
+                        "surface-bright": "#39393b",
+                        "on-surface-variant": "#cbc3d7",
+                        "secondary-container": "#474649",
+                        "on-secondary": "#303032",
+                        "surface-container-low": "#1b1b1d",
+                        "on-tertiary-fixed": "#201c00",
+                        "on-error": "#690005",
+                        "surface-container": "#1f1f21",
+                        "error-container": "#93000a",
+                        "secondary-fixed-dim": "#c8c6c8",
+                        "secondary": "#c8c6c8",
+                        "on-background": "#e5e1e4",
+                        "on-primary-container": "#594983",
+                        "primary-fixed-dim": "#d0bcff",
+                        "inverse-surface": "#e5e1e4",
+                        "on-primary-fixed-variant": "#4d3d76",
+                        "on-secondary-container": "#b6b4b7",
+                        "surface": "#131315",
+                        "secondary-fixed": "#e4e2e4",
+                        "on-tertiary-fixed-variant": "#4f4800",
+                        "on-surface": "#e5e1e4",
+                        "background": "#131315",
+                        "outline": "#948f9a",
+                        "on-tertiary-container": "#5c5301",
+                        "surface-container-highest": "#353437",
+                        "surface-dim": "#131315",
+                        "primary": "#e9ddff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "panel-gap": "20px",
+                        "container-padding": "24px",
+                        "base": "8px",
+                        "gutter": "16px",
+                        "section-margin": "40px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Geist"],
+                        "label-md": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "headline-lg-mobile": ["Geist"],
+                        "label-sm": ["Geist"],
+                        "headline-md": ["Geist"],
+                        "body-lg": ["Geist"],
+                        "body-md": ["Geist"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface">
+<!-- MangaFlow App Shell -->
+<div class="flex h-screen overflow-hidden">
+<!-- SideNavBar Component -->
+<aside class="hidden md:flex flex-col h-full w-64 bg-surface-container-low border-r border-outline-variant/30 p-panel-gap shrink-0">
+<div class="flex flex-col gap-6 h-full">
+<!-- Brand Header -->
+<div class="flex items-center gap-3 px-2">
+<div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
+</div>
+<div>
+<h1 class="font-display-lg text-[20px] leading-tight font-bold text-primary tracking-tighter">MangaFlow</h1>
+<p class="font-label-sm text-on-surface-variant opacity-70">Studio Management</p>
+</div>
+</div>
+<!-- CTA -->
+<button class="w-full bg-primary-container text-on-primary-container font-label-md py-3 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[20px]">add</span>
+                    New Project
+                </button>
+<!-- Navigation Links -->
+<nav class="flex flex-col gap-1 mt-4">
+<a class="flex items-center gap-base px-4 py-3 text-on-surface-variant hover:bg-surface-bright/10 hover:text-primary transition-all duration-200 rounded-xl" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-base px-4 py-3 text-on-surface-variant hover:bg-surface-bright/10 hover:text-primary transition-all duration-200 rounded-xl" href="#">
+<span class="material-symbols-outlined">auto_stories</span>
+<span class="font-label-md">Series</span>
+</a>
+<a class="flex items-center gap-base px-4 py-3 bg-primary-container text-on-primary-container rounded-xl shadow-[0_0_0_2px_rgba(208,188,255,0.2)]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">groups</span>
+<span class="font-label-md">Meetings</span>
+</a>
+<a class="flex items-center gap-base px-4 py-3 text-on-surface-variant hover:bg-surface-bright/10 hover:text-primary transition-all duration-200 rounded-xl" href="#">
+<span class="material-symbols-outlined">diversity_3</span>
+<span class="font-label-md">Team</span>
+</a>
+<a class="flex items-center gap-base px-4 py-3 text-on-surface-variant hover:bg-surface-bright/10 hover:text-primary transition-all duration-200 rounded-xl" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-md">Analytics</span>
+</a>
+</nav>
+<!-- Footer Nav -->
+<div class="mt-auto flex flex-col gap-1 pt-4 border-t border-outline-variant/20">
+<a class="flex items-center gap-base px-4 py-3 text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md">Settings</span>
+</a>
+<a class="flex items-center gap-base px-4 py-3 text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-md">Support</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col min-w-0 bg-background relative">
+<!-- TopAppBar Component -->
+<header class="h-16 px-container-padding flex justify-between items-center sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-outline-variant/30">
+<div class="flex items-center gap-4">
+<button class="md:hidden text-on-surface">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="relative group">
+<span class="absolute inset-y-0 left-3 flex items-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</span>
+<input class="bg-surface-container-low border border-outline-variant/30 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all w-64 md:w-80" placeholder="Search entries..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">history_edu</span>
+</button>
+<div class="h-8 w-[1px] bg-outline-variant/30 mx-2"></div>
+<div class="flex items-center gap-3 cursor-pointer group">
+<div class="text-right hidden sm:block">
+<p class="font-label-md text-on-surface leading-none">Chief Editor</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest mt-1">Management</p>
+</div>
+<img alt="Chief Editor Profile" class="w-10 h-10 rounded-full border-2 border-primary-container shadow-lg" data-alt="A professional close-up portrait avatar of a seasoned digital editor with silver-streaked hair and stylish modern glasses, set against a blurred dark studio background. The lighting is moody and cinematic, using the MangaFlow purple and dark grey color palette to create an air of authority and technical expertise." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDYfVN0mH268cK8WNkwMgc7vcWPvhZiH0Lng9unBZ4HZ9VeH-w6Y6oKSMBN5kBphNvfff7HhjmdIFQZFC1eJpZDRCUN2ZRh3PU0y67bJCf6SXzR0pMhM6SOtKilvhHkpzwpttBLIpceUHaUhJ13AtCNOtrCeiuFlWMidBfqRrIloTNDmyI6nbBzS60WOeXNKPbKW9CE2bvQGHsUkHptIGkKyYYrSNNMden_LYor8fOAffxo3ssXGv_lmfG4DmUnMuYtQHxVuxYCiSA"/>
+</div>
+</div>
+</header>
+<!-- Dashboard Content -->
+<div class="flex-1 overflow-y-auto custom-scrollbar p-container-padding pb-40">
+<!-- Page Header -->
+<section class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-section-margin">
+<div>
+<div class="flex items-center gap-3 mb-2">
+<span class="bg-tertiary-container/20 text-tertiary font-label-sm px-3 py-1 rounded-full border border-tertiary/30 uppercase tracking-wider">AWAITING DECISION</span>
+<span class="text-on-surface-variant font-label-sm">Oct 24, 2023</span>
+</div>
+<h2 class="font-headline-lg text-on-surface flex items-center gap-3">
+                            Neon Pulse - Ch. 45 Serialization Review
+                            <span class="material-symbols-outlined text-primary-container opacity-50">verified_user</span>
+</h2>
+</div>
+<div class="flex gap-2">
+<button class="bg-surface-container-high text-on-surface font-label-md px-4 py-2 rounded-xl border border-outline-variant/30 flex items-center gap-2 hover:bg-surface-bright/20 transition-all">
+<span class="material-symbols-outlined text-[18px]">share</span>
+                            Share Report
+                        </button>
+<button class="bg-surface-container-high text-on-surface font-label-md px-4 py-2 rounded-xl border border-outline-variant/30 flex items-center gap-2 hover:bg-surface-bright/20 transition-all">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                            Export
+                        </button>
+</div>
+</section>
+<!-- Vote Summary Bar -->
+<section class="glass-panel rounded-2xl p-6 mb-8 overflow-hidden relative">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-6">
+<div class="flex flex-col">
+<span class="text-on-surface-variant font-label-sm mb-1">Total Participation</span>
+<span class="font-display-lg text-[32px] text-on-surface">10 <span class="text-sm font-normal text-on-surface-variant">/ 12 Editors</span></span>
+</div>
+<div class="flex flex-col">
+<span class="text-on-surface-variant font-label-sm mb-1">Approval Rating</span>
+<span class="font-display-lg text-[32px] text-[#4ade80]">80%</span>
+</div>
+<div class="flex flex-col items-center md:items-end">
+<div class="flex items-center gap-2 text-[#4ade80] mb-1">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">thumb_up</span>
+<span class="font-label-md">YES</span>
+</div>
+<span class="font-display-lg text-[32px]">08</span>
+</div>
+<div class="flex flex-col items-center md:items-end">
+<div class="flex items-center gap-2 text-[#f87171] mb-1">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">thumb_down</span>
+<span class="font-label-md">NO</span>
+</div>
+<span class="font-display-lg text-[32px]">02</span>
+</div>
+</div>
+<!-- Bi-color Bar Chart -->
+<div class="w-full h-12 bg-surface-container-highest rounded-xl flex overflow-hidden border border-outline-variant/30">
+<div class="h-full bg-gradient-to-r from-[#4ade80] to-[#22c55e] transition-all duration-1000 ease-out flex items-center justify-center text-on-primary font-bold" style="width: 80%">
+                            80%
+                        </div>
+<div class="h-full bg-gradient-to-r from-[#f87171] to-[#ef4444] transition-all duration-1000 ease-out flex items-center justify-center text-on-error font-bold" style="width: 20%">
+                            20%
+                        </div>
+</div>
+<!-- Decorative Glow -->
+<div class="absolute -right-20 -top-20 w-40 h-40 bg-primary/10 blur-[80px] rounded-full pointer-events-none"></div>
+</section>
+<!-- Individual Vote Breakdown -->
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-panel-gap">
+<!-- Voter Card 1 -->
+<div class="glass-panel p-panel-gap rounded-2xl flex flex-col gap-4 hover:shadow-[0_0_20px_rgba(208,188,255,0.05)] transition-all group">
+<div class="flex justify-between items-start">
+<div class="flex gap-4 items-center">
+<img alt="Voter Avatar" class="w-12 h-12 rounded-full border border-outline-variant/50" data-alt="A stylized portrait of a middle-aged male Japanese manga editor with short black hair and professional attire. The background is a minimalist office space with soft dark lighting and subtle purple lens flares, matching the MangaFlow Technical Minimalist aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGB3tDbWBa3lr7EktZ8McANM7NZvcV9tqHLBXS92sBqapxovsJmyP7cYSfsS48BuflfEU9zftboWzyNr1i8RazTtZTpErSS9lVqN5KkB35J0luAUBc1-ojt77L0Yyanomh_QRrJA6hqCDufgocS8PC4hYWp3P9ucvjY5SHG5f-JMWxgIuw2VCppz7k7smv__tuWw13rm2A5nPT1IKJqLPgQFtG3a8OCibm79WgkAjHH4ubWqk3WB509JaV7QLu399-P2-cVikZrEep"/>
+<div>
+<h4 class="font-headline-md text-[18px]">Tanaka-san</h4>
+<span class="bg-surface-container-high text-on-surface-variant font-label-sm px-2 py-0.5 rounded border border-outline-variant/30">Editorial Board</span>
+</div>
+</div>
+<div class="px-4 py-1.5 rounded-lg bg-[#4ade80]/10 border border-[#4ade80]/30 text-[#4ade80] font-bold tracking-widest text-sm">
+                                YES
+                            </div>
+</div>
+<div class="bg-surface-container-lowest/50 p-3 rounded-xl border border-outline-variant/20 italic text-on-surface-variant text-sm">
+                            "The world-building in this chapter is exceptional. The pacing has significantly improved since the last review."
+                        </div>
+<div class="space-y-3 mt-2">
+<div class="space-y-1">
+<div class="flex justify-between text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+<span>Nội dung (Content)</span>
+<span class="text-primary">9/10</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 90%"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+<span>Vẽ (Art)</span>
+<span class="text-primary">8/10</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 80%"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+<span>Sáng tạo (Creativity)</span>
+<span class="text-primary">9/10</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 90%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Voter Card 2 -->
+<div class="glass-panel p-panel-gap rounded-2xl flex flex-col gap-4 hover:shadow-[0_0_20px_rgba(208,188,255,0.05)] transition-all">
+<div class="flex justify-between items-start">
+<div class="flex gap-4 items-center">
+<img alt="Voter Avatar" class="w-12 h-12 rounded-full border border-outline-variant/50" data-alt="A portrait of a young female Japanese creative director with bob-cut hair and modern minimal glasses. The background has a dark studio aesthetic with subtle bokeh lighting in shades of deep charcoal and soft lavender, emphasizing professional digital art environments." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDay1nr5uRHZMiG9OrC_kwTc8hII5MYndfWFfIX2Zg0bTu4upsziL9ao2F2qbn_d1F4yS5ye3Pxf9CwsPBuLsV-1T-wG_xja43dvC3NyMN3fE9hZ1QqV5MLII3s_CDXYJxED0faqDC5k9nrNcCVLHMy-qLJZrinlkeeVTrzKFb_Co4BfUz6l5WaPiBiDYMtmuYDWgUSnxLU2Di3-jXAki9TZQUpWLaftVvzmFfupXglfN_qNauyBGOqoeEVXt3oO5DMFhlleJuOaw9s"/>
+<div>
+<h4 class="font-headline-md text-[18px]">Sato-sensei</h4>
+<span class="bg-surface-container-high text-on-surface-variant font-label-sm px-2 py-0.5 rounded border border-outline-variant/30">Senior Editor</span>
+</div>
+</div>
+<div class="px-4 py-1.5 rounded-lg bg-[#f87171]/10 border border-[#f87171]/30 text-[#f87171] font-bold tracking-widest text-sm">
+                                NO
+                            </div>
+</div>
+<div class="bg-surface-container-lowest/50 p-3 rounded-xl border border-outline-variant/20 italic text-on-surface-variant text-sm">
+                            "Art style feels inconsistent in action scenes. Needs more polish on background details."
+                        </div>
+<div class="space-y-3 mt-2">
+<div class="space-y-1">
+<div class="flex justify-between text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+<span>Nội dung (Content)</span>
+<span class="text-primary">6/10</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 60%"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+<span>Vẽ (Art)</span>
+<span class="text-primary">4/10</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 40%"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+<span>Sáng tạo (Creativity)</span>
+<span class="text-primary">7/10</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 70%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Voter Card 3 (Repeat for Grid Feel) -->
+<div class="glass-panel p-panel-gap rounded-2xl flex flex-col gap-4 hover:shadow-[0_0_20px_rgba(208,188,255,0.05)] transition-all">
+<div class="flex justify-between items-start">
+<div class="flex gap-4 items-center">
+<img alt="Voter Avatar" class="w-12 h-12 rounded-full border border-outline-variant/50" data-alt="A portrait of a male manga critic with a sharp, professional look, wearing a dark turtleneck. The lighting is focused and technical, with a dark slate-gray background that incorporates subtle glowing interface elements in purple, reflecting a high-end digital workflow." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvh2_zoJPVt7RPu6LR8HK5eZGnbb5xltcAKB-BbZF7rkeok2Iuqgj0a9u5iAirq8Ac_g9Dq1W1ZXIFoLA5F36ExGEDmsV0YFUj6i8Mx5sDXbBXY4cx7fj9umcCSU9lYASV8q9DQzyZg5bnFJdey6dBdmV1QycQU0XUIsBL2QnrowxUJ7Bmiqy7oXVgjJUojeyFymtxVNzY77Cd9bv6aAkL-6WHs6VxDIKPsL3jj-8xKbQxJtX-T2xkHDIhG0ZkO0jJyv_DxTMU92iz"/>
+<div>
+<h4 class="font-headline-md text-[18px]">Kobayashi-san</h4>
+<span class="bg-surface-container-high text-on-surface-variant font-label-sm px-2 py-0.5 rounded border border-outline-variant/30">Guest Reviewer</span>
+</div>
+</div>
+<div class="px-4 py-1.5 rounded-lg bg-[#4ade80]/10 border border-[#4ade80]/30 text-[#4ade80] font-bold tracking-widest text-sm">
+                                YES
+                            </div>
+</div>
+<div class="bg-surface-container-lowest/50 p-3 rounded-xl border border-outline-variant/20 italic text-on-surface-variant text-sm">
+                            "Highly innovative character designs. This series has strong merchandise potential."
+                        </div>
+<div class="space-y-3 mt-2">
+<div class="space-y-1">
+<div class="flex justify-between text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+<span>Nội dung (Content)</span>
+<span class="text-primary">7/10</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 70%"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+<span>Vẽ (Art)</span>
+<span class="text-primary">9/10</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 90%"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+<span>Sáng tạo (Creativity)</span>
+<span class="text-primary">10/10</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 100%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Placeholder for empty/loading -->
+<div class="rounded-2xl border-2 border-dashed border-outline-variant/20 flex flex-col items-center justify-center p-panel-gap text-on-surface-variant opacity-50">
+<span class="material-symbols-outlined text-[48px] mb-2">more_horiz</span>
+<p class="font-label-md">Viewing 3 of 10 responses</p>
+</div>
+</div>
+</div>
+<!-- Chief Editor Decision Panel (Fixed Bottom) -->
+<footer class="fixed bottom-0 right-0 left-0 md:left-64 bg-surface-container-low/90 backdrop-blur-xl border-t border-outline-variant/30 px-container-padding py-6 z-40">
+<div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">gavel</span>
+</div>
+<div>
+<h3 class="font-headline-md text-on-surface leading-tight">Final Verdict Required</h3>
+<p class="font-label-sm text-on-surface-variant">Final decision authority: Chief Editor</p>
+</div>
+</div>
+<div class="flex gap-4 w-full sm:w-auto">
+<button class="flex-1 sm:flex-none px-8 py-3 rounded-xl bg-gradient-to-r from-red-500/10 to-red-600/10 border border-red-500/40 text-red-400 font-bold hover:from-red-500 hover:to-red-600 hover:text-white transition-all active:scale-95 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">block</span>
+                            Reject Series
+                        </button>
+<button class="flex-1 sm:flex-none px-12 py-3 rounded-xl bg-primary text-on-primary font-bold shadow-[0_0_20px_rgba(208,188,255,0.3)] hover:bg-primary-container hover:text-on-primary-container transition-all active:scale-95 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">check_circle</span>
+                            Approve Series
+                        </button>
+</div>
+</div>
+</footer>
+</main>
+</div>
+<!-- Interaction Script -->
+<script>
+        // Simple scale micro-interaction for cards
+        document.querySelectorAll('.glass-panel').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-4px)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body></html>
