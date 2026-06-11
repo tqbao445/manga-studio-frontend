@@ -39,7 +39,7 @@ export const CHIEF_EDITOR_ID = 7
  * @returns {boolean}
  */
 export const isChiefEditor = (user) =>
-  user?.role === 'CHIEF_EDITOR' || user?.id === CHIEF_EDITOR_ID
+  user?.role === 'CHIEF_EDITOR' || (!user?.role && user?.id === CHIEF_EDITOR_ID)
 
 export const useEditorialStore = create((set, get) => ({
   /** Danh sách meetings load từ API */
