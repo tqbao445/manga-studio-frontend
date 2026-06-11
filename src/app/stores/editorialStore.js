@@ -28,11 +28,18 @@ import meetingService from '../../services/meetingService'
  */
 
 /**
- * Kiểm tra user có phải Chief Editor không dựa trên role (không hardcode ID).
+ * ID của Chief Editor (fallback cho user có id=7 mà role chưa được set CHIEF_EDITOR trên DB).
+ */
+export const CHIEF_EDITOR_ID = 7
+
+/**
+ * Kiểm tra user có phải Chief Editor không.
+ * Ưu tiên check role string, fallback sang hardcode ID cũ.
  * @param {Object|null} user
  * @returns {boolean}
  */
-export const isChiefEditor = (user) => user?.role === 'CHIEF_EDITOR'
+export const isChiefEditor = (user) =>
+  user?.role === 'CHIEF_EDITOR' || user?.id === CHIEF_EDITOR_ID
 
 export const useEditorialStore = create((set, get) => ({
   /** Danh sách meetings load từ API */

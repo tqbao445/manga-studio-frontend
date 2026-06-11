@@ -44,13 +44,13 @@ const extraNav = [
     label: "Publishing",
     icon: "calendar_month",
     path: "/publishing",
-    roles: ["EDITORIAL_BOARD"],
+    roles: ["EDITORIAL_BOARD", "CHIEF_EDITOR"],
   },
   {
     label: "Editorial Vote",
     icon: "how_to_vote",
     path: "/publishing/votes",
-    roles: ["EDITORIAL_BOARD"],
+    roles: ["EDITORIAL_BOARD", "CHIEF_EDITOR"],
   },
   { label: "Rankings", icon: "trending_up", path: "/rankings", roles: ["ALL"] },
 ];

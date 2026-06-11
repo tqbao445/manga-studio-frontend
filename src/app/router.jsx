@@ -212,20 +212,20 @@ export default function App() {
           {/* Rankings — bảng xếp hạng tuần (mọi role đều xem được) */}
           <Route path="/rankings" element={<RankingsPage />} />
 
-          {/* Publishing — lịch xuất bản, chỉ EDITORIAL_BOARD */}
+          {/* Publishing — lịch xuất bản, chỉ EDITORIAL_BOARD và CHIEF_EDITOR */}
           <Route
             path="/publishing"
             element={
-              <RoleGuard allowedRoles={["EDITORIAL_BOARD"]}>
+              <RoleGuard allowedRoles={["EDITORIAL_BOARD", "CHIEF_EDITOR"]}>
                 <PublishingPage />
               </RoleGuard>
             }
           />
-          {/* Vote Entry — nhập phiếu bầu xếp hạng, chỉ EDITORIAL_BOARD */}
+          {/* Vote Entry — nhập phiếu bầu xếp hạng, chỉ EDITORIAL_BOARD và CHIEF_EDITOR */}
           <Route
             path="/publishing/votes"
             element={
-              <RoleGuard allowedRoles={["EDITORIAL_BOARD"]}>
+              <RoleGuard allowedRoles={["EDITORIAL_BOARD", "CHIEF_EDITOR"]}>
                 <VoteEntryPage />
               </RoleGuard>
             }
