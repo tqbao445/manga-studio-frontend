@@ -181,16 +181,16 @@ export default function App() {
           />
 
           {/* ─── Editorial Board Meetings ─── */}
-          {/* Danh sách cuộc họp — EDITORIAL_BOARD */}
+          {/* Danh sách cuộc họp — EDITORIAL_BOARD + CHIEF_EDITOR (Chief tạo + kết thúc) */}
           <Route
             path="/editorial"
             element={
-              <RoleGuard allowedRoles={["EDITORIAL_BOARD"]}>
+              <RoleGuard allowedRoles={["EDITORIAL_BOARD", "CHIEF_EDITOR"]}>
                 <EditorialBoardPage />
               </RoleGuard>
             }
           />
-          {/* Trang bỏ phiếu — EDITORIAL_BOARD, meeting phải ở trạng thái PENDING */}
+          {/* Trang bỏ phiếu — EDITORIAL_BOARD (chỉ EB mới vote) */}
           <Route
             path="/editorial/:meetingId/vote"
             element={
@@ -199,11 +199,11 @@ export default function App() {
               </RoleGuard>
             }
           />
-          {/* Trang kết quả vote — EDITORIAL_BOARD, meeting phải ở trạng thái COMPLETED */}
+          {/* Trang kết quả vote — EDITORIAL_BOARD + CHIEF_EDITOR (Chief mới được Finalize) */}
           <Route
             path="/editorial/:meetingId/results"
             element={
-              <RoleGuard allowedRoles={["EDITORIAL_BOARD"]}>
+              <RoleGuard allowedRoles={["EDITORIAL_BOARD", "CHIEF_EDITOR"]}>
                 <VotingResultsPage />
               </RoleGuard>
             }
@@ -212,20 +212,20 @@ export default function App() {
           {/* Rankings — bảng xếp hạng tuần (mọi role đều xem được) */}
           <Route path="/rankings" element={<RankingsPage />} />
 
-          {/* Publishing — lịch xuất bản, chỉ EDITORIAL_BOARD */}
+          {/* Publishing — lịch xuất bản, chỉ EDITORIAL_BOARD và CHIEF_EDITOR */}
           <Route
             path="/publishing"
             element={
-              <RoleGuard allowedRoles={["EDITORIAL_BOARD"]}>
+              <RoleGuard allowedRoles={["EDITORIAL_BOARD", "CHIEF_EDITOR"]}>
                 <PublishingPage />
               </RoleGuard>
             }
           />
-          {/* Vote Entry — nhập phiếu bầu xếp hạng, chỉ EDITORIAL_BOARD */}
+          {/* Vote Entry — nhập phiếu bầu xếp hạng, chỉ EDITORIAL_BOARD và CHIEF_EDITOR */}
           <Route
             path="/publishing/votes"
             element={
-              <RoleGuard allowedRoles={["EDITORIAL_BOARD"]}>
+              <RoleGuard allowedRoles={["EDITORIAL_BOARD", "CHIEF_EDITOR"]}>
                 <VoteEntryPage />
               </RoleGuard>
             }
