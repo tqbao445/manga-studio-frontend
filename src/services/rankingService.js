@@ -32,6 +32,12 @@ const rankingService = {
       params: { month },
     })
   },
+
+  // ── At-Risk ──
+  getAtRisk: async () => {
+    const res = await api.get('/ranking/at-risk')
+    return res.data
+  },
 }
 
 export default rankingService
