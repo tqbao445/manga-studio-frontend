@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MangaFlow - Assistant Dashboard</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                            "surface-tint": "#d2bbff",
+                            "surface-deep": "#0F0F1A",
+                            "primary-container": "#7c3aed",
+                            "error-container": "#93000a",
+                            "on-tertiary": "#4f2500",
+                            "on-primary": "#3f008e",
+                            "accent-pink": "#CB9FD2",
+                            "on-tertiary-fixed-variant": "#713700",
+                            "on-error-container": "#ffdad6",
+                            "surface-container-lowest": "#0c0c1f",
+                            "surface-container-high": "#28283d",
+                            "on-tertiary-fixed": "#301400",
+                            "tertiary-container": "#a15100",
+                            "on-primary-container": "#ede0ff",
+                            "primary-fixed": "#eaddff",
+                            "on-primary-fixed-variant": "#5a00c6",
+                            "surface-container-highest": "#333348",
+                            "surface-container": "#1e1e32",
+                            "primary": "#d2bbff",
+                            "error": "#ffb4ab",
+                            "tertiary-fixed": "#ffdcc6",
+                            "tertiary": "#ffb784",
+                            "tertiary-fixed-dim": "#ffb784",
+                            "on-secondary-container": "#c2aef0",
+                            "on-secondary-fixed": "#210f48",
+                            "background": "#111125",
+                            "on-primary-fixed": "#25005a",
+                            "on-secondary": "#37265e",
+                            "on-error": "#690005",
+                            "inverse-surface": "#e2e0fc",
+                            "surface-variant": "#333348",
+                            "secondary-fixed-dim": "#d0bcff",
+                            "secondary": "#d0bcff",
+                            "primary-fixed-dim": "#d2bbff",
+                            "on-tertiary-container": "#ffe0cd",
+                            "on-background": "#e2e0fc",
+                            "inverse-on-surface": "#2f2e43",
+                            "surface-container-low": "#1a1a2e",
+                            "accent-peach": "#FFC9C1",
+                            "secondary-container": "#503f79",
+                            "outline": "#958da1",
+                            "danger-axe": "#EF4444",
+                            "surface-dim": "#111125",
+                            "outline-variant": "#4a4455",
+                            "success-vibrant": "#10B981",
+                            "inverse-primary": "#732ee4",
+                            "on-surface": "#e2e0fc",
+                            "on-secondary-fixed-variant": "#4d3d76",
+                            "secondary-fixed": "#e9ddff",
+                            "accent-gold": "#FFD066",
+                            "surface": "#111125",
+                            "on-surface-variant": "#ccc3d8",
+                            "surface-bright": "#37374d"
+                    },
+                    "borderRadius": {
+                            "DEFAULT": "0.25rem",
+                            "lg": "0.5rem",
+                            "xl": "0.75rem",
+                            "full": "9999px"
+                    },
+                    "spacing": {
+                            "unit": "4px",
+                            "gutter": "24px",
+                            "margin-desktop": "40px",
+                            "container-max": "1440px",
+                            "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                            "label-md": ["JetBrains Mono"],
+                            "headline-lg": ["Inter"],
+                            "body-md": ["Inter"],
+                            "headline-md": ["Inter"],
+                            "headline-xl": ["Inter"],
+                            "label-sm": ["JetBrains Mono"],
+                            "body-lg": ["Inter"],
+                            "headline-lg-mobile": ["Inter"],
+                            "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                            "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                            "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                            "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                            "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                            "headline-xl": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                            "label-sm": ["10px", {"lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                            "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                            "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                            "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Glassmorphism utility */
+        .glass-panel {
+            background-color: rgba(26, 26, 46, 0.6); /* surface-container-low slightly transparent */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-left: 1px solid rgba(255, 255, 255, 0.02);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex overflow-hidden">
+<!-- TopNavBar -->
+<nav class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-4 md:px-margin-desktop h-16 bg-surface-dim/80 backdrop-blur-md border-b border-outline-variant/30 shadow-sm">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-bold tracking-tight text-primary">MangaFlow</span>
+</div>
+<div class="flex items-center gap-6">
+<!-- Search Icon (Mobile) / Search Bar (Desktop) -->
+<button class="text-on-surface-variant hover:text-primary transition-colors duration-200">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors duration-200">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors duration-200 hidden md:block">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/50">
+<img alt="Artist Profile" class="w-full h-full object-cover" data-alt="A stylized digital portrait of a manga artist in a cyberpunk aesthetic, lit by glowing neon pink and blue monitors in a dark studio. High contrast, professional illustration style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZAgZ10UwGDN9q8cdmgRlouSPAz6eX66ywobXc7LK56HrsuZeyeVbbVXkwXqy0GPIARhn2UCdQRyhJQlrgcRWH_mEUXpMR90350yJXZbWN9L6QZ0pX6t9sJdYEW4FPV9Gk6FWksy_Mk0LNRS5lWWHsI9sodIgNOwpXfAAWCnMYNGy5ZKsVgTYgrieyhd3YbU-E52d3Fa3VM23vGvSi9zPPx4Bsezf0c3uy9LeOjzTZMb2IiyDfI3SYZeRAjZ16xtl46K0iqfG2AII"/>
+</div>
+</div>
+</nav>
+<!-- SideNavBar (Desktop) -->
+<aside class="hidden lg:flex flex-col h-screen pt-20 pb-8 docked left-0 w-64 bg-surface-container-low border-r border-outline-variant/30 shrink-0 z-40 relative">
+<div class="px-6 mb-8">
+<h2 class="font-headline-md text-headline-md text-on-surface">Studio Alpha</h2>
+<p class="font-label-md text-label-md text-on-surface-variant mt-1">Production Mode</p>
+<button class="mt-6 w-full bg-primary-container text-on-primary-container font-label-md text-label-md py-2 px-4 rounded-lg hover:brightness-110 transition-all shadow-lg flex justify-center items-center gap-2">
+<span class="material-symbols-outlined" data-icon="add">add</span> New Chapter
+            </button>
+</div>
+<nav class="flex-1 flex flex-col gap-2 overflow-y-auto">
+<!-- Active Tab: Studio -->
+<a class="flex items-center gap-4 bg-secondary-container text-on-secondary-container rounded-xl px-4 py-3 mx-2 scale-[0.98] transition-transform" href="#">
+<span class="material-symbols-outlined icon-fill" data-icon="dashboard">dashboard</span>
+<span class="font-label-md text-label-md">Studio</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant hover:text-on-surface rounded-xl px-4 py-3 mx-2 hover:bg-surface-container-highest transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="auto_stories">auto_stories</span>
+<span class="font-label-md text-label-md">Series</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant hover:text-on-surface rounded-xl px-4 py-3 mx-2 hover:bg-surface-container-highest transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="collections_bookmark">collections_bookmark</span>
+<span class="font-label-md text-label-md">Chapters</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant hover:text-on-surface rounded-xl px-4 py-3 mx-2 hover:bg-surface-container-highest transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="brush">brush</span>
+<span class="font-label-md text-label-md">Assets</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant hover:text-on-surface rounded-xl px-4 py-3 mx-2 hover:bg-surface-container-highest transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-label-md text-label-md">Team</span>
+</a>
+</nav>
+<div class="mt-auto flex flex-col gap-2 pt-4 border-t border-outline-variant/30 mx-2">
+<a class="flex items-center gap-4 text-on-surface-variant hover:text-on-surface rounded-xl px-4 py-3 hover:bg-surface-container-highest transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+<span class="font-label-md text-label-md">Help</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant hover:text-on-surface rounded-xl px-4 py-3 hover:bg-surface-container-highest transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-label-md text-label-md">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto pt-20 pb-24 lg:pb-8 px-4 md:px-margin-desktop relative">
+<!-- Header -->
+<div class="mb-8">
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">Assistant Dashboard</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2">Welcome back. You have 3 pending actions.</p>
+</div>
+<!-- 2-Column Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- LEFT COLUMN: Rework Orders (Actionable) -->
+<div class="lg:col-span-7 flex flex-col gap-6">
+<div class="glass-panel rounded-xl p-6 shadow-lg relative overflow-hidden">
+<!-- Subtle glow effect -->
+<div class="absolute -top-24 -right-24 w-48 h-48 bg-error-container/20 rounded-full blur-3xl pointer-events-none"></div>
+<div class="flex justify-between items-center mb-6">
+<h2 class="font-headline-md text-headline-md flex items-center gap-3">
+<span class="material-symbols-outlined text-error" data-icon="assignment_return">assignment_return</span>
+                            Rework Orders
+                        </h2>
+<span class="bg-surface-container-highest text-on-surface-variant font-label-md text-label-md px-3 py-1 rounded-full border border-outline-variant/30">2 Pending</span>
+</div>
+<div class="flex flex-col gap-4">
+<!-- Rework Item 1 -->
+<div class="bg-surface-container/50 border border-outline-variant/30 rounded-lg p-5 hover:border-error/50 transition-colors group">
+<div class="flex justify-between items-start mb-3">
+<div>
+<h3 class="font-body-lg text-body-lg font-bold text-on-surface group-hover:text-primary transition-colors">Inking Pages 12-14</h3>
+<p class="font-label-md text-label-md text-secondary mt-1">Series: Neon Samurai</p>
+</div>
+<span class="flex items-center gap-1 text-accent-gold font-label-md text-label-md">
+<span class="w-2 h-2 rounded-full bg-accent-gold shadow-[0_0_8px_rgba(255,208,102,0.6)]"></span>
+                                    High Priority
+                                </span>
+</div>
+<div class="bg-surface-dim border-l-2 border-error p-3 rounded-r bg-opacity-60 mb-4">
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+<strong class="text-error font-medium">Mangaka Comment:</strong> "Line weights on the main character's face are too thick in panel 3. Needs to be more delicate, especially around the eyes. Please revise."
+                                </p>
+</div>
+<div class="flex justify-end">
+<button class="bg-primary-container text-on-primary-container font-label-md text-label-md py-2 px-6 rounded hover:bg-primary hover:text-on-primary transition-colors flex items-center gap-2">
+                                    Fix Now <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Rework Item 2 -->
+<div class="bg-surface-container/50 border border-outline-variant/30 rounded-lg p-5 hover:border-error/50 transition-colors group">
+<div class="flex justify-between items-start mb-3">
+<div>
+<h3 class="font-body-lg text-body-lg font-bold text-on-surface group-hover:text-primary transition-colors">Background Toning - Ch 44</h3>
+<p class="font-label-md text-label-md text-secondary mt-1">Series: Abyssal Academy</p>
+</div>
+</div>
+<div class="bg-surface-dim border-l-2 border-error p-3 rounded-r bg-opacity-60 mb-4">
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+<strong class="text-error font-medium">Mangaka Comment:</strong> "The sky tone moiré pattern is visible when zoomed out. Please adjust the screentone frequency to match standard 60L/85%."
+                                </p>
+</div>
+<div class="flex justify-end">
+<button class="border border-outline-variant text-on-surface font-label-md text-label-md py-2 px-6 rounded hover:bg-surface-container-highest transition-colors flex items-center gap-2">
+                                    Fix Now <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN: Earning Statement (Insights) -->
+<div class="lg:col-span-5 flex flex-col gap-6">
+<div class="glass-panel rounded-xl p-6 shadow-lg h-full flex flex-col relative overflow-hidden">
+<!-- Subtle glow effect -->
+<div class="absolute -bottom-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+<div class="flex justify-between items-center mb-8">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Earning Statement</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Approved tasks (Current Month)</p>
+</div>
+<div class="text-right">
+<p class="font-headline-lg-mobile text-headline-lg-mobile text-accent-gold font-bold">¥142,500</p>
+<span class="font-label-sm text-label-sm text-success-vibrant flex items-center justify-end gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="trending_up">trending_up</span> +12% from last month
+                            </span>
+</div>
+</div>
+<!-- Custom CSS Chart simulating Recharts -->
+<div class="flex-1 min-h-[250px] flex flex-col justify-end relative mt-4">
+<!-- Y-Axis labels & Grid lines -->
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none">
+<div class="border-t border-outline-variant/10 w-full flex justify-start -translate-y-2"><span class="font-label-sm text-label-sm text-on-surface-variant/50">150k</span></div>
+<div class="border-t border-outline-variant/10 w-full flex justify-start -translate-y-2"><span class="font-label-sm text-label-sm text-on-surface-variant/50">100k</span></div>
+<div class="border-t border-outline-variant/10 w-full flex justify-start -translate-y-2"><span class="font-label-sm text-label-sm text-on-surface-variant/50">50k</span></div>
+<div class="border-t border-outline-variant/30 w-full"></div>
+</div>
+<!-- Chart Bars Container -->
+<div class="flex justify-between items-end h-[200px] pl-10 pr-4 z-10 gap-2 md:gap-4 relative">
+<!-- Week 1 -->
+<div class="flex-1 flex flex-col items-center group relative cursor-pointer">
+<!-- Hover Tooltip -->
+<div class="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-surface-container-high border border-outline-variant/50 p-2 rounded shadow-lg pointer-events-none z-20 w-32 text-center flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">¥35,000</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">12 Tasks</span>
+</div>
+<div class="w-full max-w-[40px] bg-secondary-container hover:bg-primary transition-colors rounded-t-sm" style="height: 45%;"></div>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-2">W1</span>
+</div>
+<!-- Week 2 -->
+<div class="flex-1 flex flex-col items-center group relative cursor-pointer">
+<div class="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-surface-container-high border border-outline-variant/50 p-2 rounded shadow-lg pointer-events-none z-20 w-32 text-center flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">¥42,000</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">15 Tasks</span>
+</div>
+<div class="w-full max-w-[40px] bg-secondary-container hover:bg-primary transition-colors rounded-t-sm" style="height: 60%;"></div>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-2">W2</span>
+</div>
+<!-- Week 3 -->
+<div class="flex-1 flex flex-col items-center group relative cursor-pointer">
+<div class="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-surface-container-high border border-outline-variant/50 p-2 rounded shadow-lg pointer-events-none z-20 w-32 text-center flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">¥25,500</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">8 Tasks</span>
+</div>
+<div class="w-full max-w-[40px] bg-secondary-container hover:bg-primary transition-colors rounded-t-sm" style="height: 35%;"></div>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-2">W3</span>
+</div>
+<!-- Week 4 (Current) -->
+<div class="flex-1 flex flex-col items-center group relative cursor-pointer">
+<div class="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-surface-container-high border border-outline-variant/50 p-2 rounded shadow-lg pointer-events-none z-20 w-32 text-center flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">¥40,000</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">14 Tasks</span>
+</div>
+<div class="w-full max-w-[40px] bg-primary rounded-t-sm" style="height: 55%; box-shadow: 0 0 12px rgba(124, 58, 237, 0.4);"></div>
+<span class="font-label-sm text-label-sm text-primary mt-2 font-bold">W4</span>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-outline-variant/20 flex justify-between items-center">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Next payout: Oct 1st</span>
+<button class="text-primary hover:text-primary-fixed font-label-md text-label-md flex items-center gap-1 transition-colors">
+                            View Details <span class="material-symbols-outlined text-[16px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="lg:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 bg-surface-container-highest/90 backdrop-blur-xl rounded-t-xl border-t border-outline-variant/30 shadow-lg pb-safe">
+<!-- Active Tab: Home -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-5 py-1 scale-90 duration-150 transition-transform" href="#">
+<span class="material-symbols-outlined icon-fill" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm-mobile mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="font-label-sm text-label-sm-mobile mt-1">Series</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+<span class="font-label-sm text-label-sm-mobile mt-1">Work</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm-mobile mt-1">Profile</span>
+</a>
+</nav>
+<style>
+        /* iOS safe area padding for bottom nav */
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            .pb-safe {
+                padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+            }
+        }
+    </style>
+</body></html>

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MangaFlow - Editor Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-tint": "#d2bbff",
+                      "surface-deep": "#0F0F1A",
+                      "primary-container": "#7c3aed",
+                      "error-container": "#93000a",
+                      "on-tertiary": "#4f2500",
+                      "on-primary": "#3f008e",
+                      "accent-pink": "#CB9FD2",
+                      "on-tertiary-fixed-variant": "#713700",
+                      "on-error-container": "#ffdad6",
+                      "surface-container-lowest": "#0c0c1f",
+                      "surface-container-high": "#28283d",
+                      "on-tertiary-fixed": "#301400",
+                      "tertiary-container": "#a15100",
+                      "on-primary-container": "#ede0ff",
+                      "primary-fixed": "#eaddff",
+                      "on-primary-fixed-variant": "#5a00c6",
+                      "surface-container-highest": "#333348",
+                      "surface-container": "#1e1e32",
+                      "primary": "#d2bbff",
+                      "error": "#ffb4ab",
+                      "tertiary-fixed": "#ffdcc6",
+                      "tertiary": "#ffb784",
+                      "tertiary-fixed-dim": "#ffb784",
+                      "on-secondary-container": "#c2aef0",
+                      "on-secondary-fixed": "#210f48",
+                      "background": "#111125",
+                      "on-primary-fixed": "#25005a",
+                      "on-secondary": "#37265e",
+                      "on-error": "#690005",
+                      "inverse-surface": "#e2e0fc",
+                      "surface-variant": "#333348",
+                      "secondary-fixed-dim": "#d0bcff",
+                      "secondary": "#d0bcff",
+                      "primary-fixed-dim": "#d2bbff",
+                      "on-tertiary-container": "#ffe0cd",
+                      "on-background": "#e2e0fc",
+                      "inverse-on-surface": "#2f2e43",
+                      "surface-container-low": "#1a1a2e",
+                      "accent-peach": "#FFC9C1",
+                      "secondary-container": "#503f79",
+                      "outline": "#958da1",
+                      "danger-axe": "#EF4444",
+                      "surface-dim": "#111125",
+                      "outline-variant": "#4a4455",
+                      "success-vibrant": "#10B981",
+                      "inverse-primary": "#732ee4",
+                      "on-surface": "#e2e0fc",
+                      "on-secondary-fixed-variant": "#4d3d76",
+                      "secondary-fixed": "#e9ddff",
+                      "accent-gold": "#FFD066",
+                      "surface": "#111125",
+                      "on-surface-variant": "#ccc3d8",
+                      "surface-bright": "#37374d"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "unit": "4px",
+                      "gutter": "24px",
+                      "margin-desktop": "40px",
+                      "container-max": "1440px",
+                      "margin-mobile": "16px"
+              },
+              "fontFamily": {
+                      "label-md": [
+                              "JetBrains Mono"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "headline-xl": [
+                              "Inter"
+                      ],
+                      "label-sm": [
+                              "JetBrains Mono"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "headline-lg-mobile": [
+                              "Inter"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-xl": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-sm": [
+                              "10px",
+                              {
+                                      "lineHeight": "14px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        .glass-card {
+            background-color: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(8px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-left: 1px solid rgba(255, 255, 255, 0.05);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .data-table-row {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .data-table-row:last-child {
+            border-bottom: none;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .progress-track {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md antialiased overflow-x-hidden min-h-screen">
+<!-- TopNavBar Component -->
+<header class="bg-surface-dim dark:bg-surface-dim docked full-width top-0 border-b border-outline-variant dark:border-outline-variant flat no shadows flex justify-between items-center h-16 px-gutter ml-60 w-[calc(100%-15rem)] fixed z-20">
+<div class="flex items-center gap-gutter">
+<span class="font-headline-md text-headline-md text-primary">MangaFlow</span>
+<nav class="hidden md:flex gap-6">
+<a class="text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors font-label-md text-label-md" href="#">Deadlines</a>
+<a class="text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors font-label-md text-label-md" href="#">Stats</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary transition-transform duration-200 active:scale-95">
+<span class="material-symbols-outlined" data-weight="fill">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-transform duration-200 active:scale-95">
+<span class="material-symbols-outlined" data-weight="fill">timer</span>
+</button>
+<button class="bg-primary-container text-on-primary-container px-4 py-2 rounded-DEFAULT font-label-md text-label-md hover:bg-opacity-90 transition-colors">
+                Review Now
+            </button>
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container-high border border-outline-variant">
+<img alt="Manga Editor" class="w-full h-full object-cover" data-alt="A detailed, realistic portrait of a professional Manga Editor working in a dimly lit, high-tech studio environment. The lighting is cinematic, highlighting their focused expression. The color palette is composed of deep navys, vibrant purples, and stark whites, fitting the MangaFlow aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnZ2oyHekiw1fEwmvbhwGW1hZio80OKhxZ1F41E0j3gdP74eGVB-4f1RzaWQjdPYjf_K9cpnLPnA0ERN_2HVVzvs_lzHrbzYX4Ulvc_WIvJoCpbAfemiSQU385wMsgbDwbWC5qvno4CvqeKPB2KzrPIzcPlTJdFQlLcrM8lJg8UUhjP059wKsqoF3vhctwwO270BxGF603k4dZNCE1EATMGNay8-AMyci1mjmZrUMbRpIf97nWAhTFqNM4UCoclZ_8Rfxm7FqlxVg"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar Component -->
+<aside class="bg-surface dark:bg-surface fixed left-0 top-0 h-screen w-60 bg-surface-container dark:bg-surface-container shadow-sm flex flex-col h-full py-base border-r border-outline-variant z-30">
+<div class="px-6 py-6 mb-4">
+<h1 class="text-headline-md font-headline-md font-bold text-primary dark:text-primary tracking-tight">MangaFlow</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">Editor Dashboard</p>
+</div>
+<div class="px-6 mb-8">
+<button class="w-full bg-primary-container text-on-primary-container font-label-md text-label-md py-2.5 rounded-DEFAULT scale-98 active:scale-95 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                New Series
+            </button>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary dark:text-primary font-bold border-r-2 border-primary bg-surface-container-highest" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">auto_stories</span>
+<span class="font-label-md text-label-md">Series Management</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">rate_review</span>
+<span class="font-label-md text-label-md">Manuscript Review</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-md text-label-md">Editorial Analytics</span>
+</a>
+</nav>
+<div class="mt-auto px-4 pb-6 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-md text-label-md">Support</span>
+</a>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-60 pt-16 min-h-screen bg-background">
+<div class="max-w-[container-max] mx-auto p-margin-desktop">
+<div class="mb-8 flex justify-between items-end">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Tantou Editor Overview</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2">Monitoring production schedules and manuscript submissions.</p>
+</div>
+</div>
+<!-- Dashboard Grid -->
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+<!-- Left Column: Late Studios Alert -->
+<section class="glass-card rounded-xl p-6 flex flex-col h-[600px]">
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-danger-axe">warning</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Late Studios Alert</h3>
+</div>
+<span class="bg-surface-container-highest px-3 py-1 rounded-full font-label-sm text-label-sm text-danger-axe border border-danger-axe/30">Action Required</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4">Studios with &lt;50% progress and &lt;3 days to deadline.</p>
+<div class="flex-1 overflow-y-auto pr-2 space-y-4">
+<!-- Alert Item 1 -->
+<div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant/50">
+<div class="flex justify-between items-start mb-3">
+<div>
+<h4 class="font-label-md text-label-md text-on-surface font-bold">Studio Kuro / Author Y. Sato</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">Series: <span class="text-secondary">Neon Genesis Tokyo</span></p>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-danger-axe block">2 Days Left</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Deadline: Friday 18:00</span>
+</div>
+</div>
+<div class="mb-4">
+<div class="flex justify-between font-label-sm text-label-sm mb-1">
+<span class="text-on-surface-variant">Progress (Inking)</span>
+<span class="text-accent-gold">45%</span>
+</div>
+<div class="h-1.5 w-full progress-track rounded-full overflow-hidden">
+<div class="h-full bg-accent-gold w-[45%] rounded-full shadow-[0_0_8px_rgba(255,208,102,0.5)]"></div>
+</div>
+</div>
+<button class="w-full bg-danger-axe text-white font-label-md text-label-md py-2 rounded-DEFAULT hover:bg-opacity-90 transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[16px]">notifications_active</span>
+                                Quick Nudge
+                            </button>
+</div>
+<!-- Alert Item 2 -->
+<div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant/50">
+<div class="flex justify-between items-start mb-3">
+<div>
+<h4 class="font-label-md text-label-md text-on-surface font-bold">Studio Shiro / Author K. Tanaka</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">Series: <span class="text-secondary">Abyss Walker</span></p>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-danger-axe block">1 Day Left</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Deadline: Thursday 12:00</span>
+</div>
+</div>
+<div class="mb-4">
+<div class="flex justify-between font-label-sm text-label-sm mb-1">
+<span class="text-on-surface-variant">Progress (Drafting)</span>
+<span class="text-danger-axe">30%</span>
+</div>
+<div class="h-1.5 w-full progress-track rounded-full overflow-hidden">
+<div class="h-full bg-danger-axe w-[30%] rounded-full shadow-[0_0_8px_rgba(239,68,68,0.5)]"></div>
+</div>
+</div>
+<button class="w-full bg-danger-axe text-white font-label-md text-label-md py-2 rounded-DEFAULT hover:bg-opacity-90 transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[16px]">notifications_active</span>
+                                Quick Nudge
+                            </button>
+</div>
+</div>
+</section>
+<!-- Right Column: Manuscript Review Queue -->
+<section class="glass-card rounded-xl p-6 flex flex-col h-[600px]">
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-success-vibrant">rate_review</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Manuscript Review Queue</h3>
+</div>
+<span class="bg-surface-container-highest px-3 py-1 rounded-full font-label-sm text-label-sm text-success-vibrant border border-success-vibrant/30">3 Pending</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4">Full chapter submissions awaiting editorial approval.</p>
+<div class="flex-1 overflow-y-auto pr-2">
+<div class="w-full text-left border-collapse">
+<!-- Queue Item 1 -->
+<div class="data-table-row py-4 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-12 h-16 bg-surface-container-highest rounded border border-outline-variant overflow-hidden flex-shrink-0">
+<img alt="Manuscript Thumbnail" class="w-full h-full object-cover" data-alt="A stylized manga manuscript page thumbnail showing dynamic action lines and character silhouettes, rendered in stark black and white with subtle glowing blue annotations indicating editorial review notes. High-density professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2BC0qNnpZxX7JrQKWiy2nsEbbtKr6cMy6sScg8WEF9XQD7-EuELehCk8pF4SeQGmgoBvW8vM-viuVcVXk-qEW7FyNrailg9ehQhKcsxpLUHX_c66ocVggUEVIs9dYQM-8-emrAWc3gkBFbneK1skvRykXTNi_k0rsxQiFDHiG7roSPyyjnrV2SVa1Q1b5Id8kLXi2-18V8ncY0mQxlc1ws9_3m0ptGm-kzr_JBicb1JBn79PU91kvYgZvyscT1u9fx8ORLB8Xkrc"/>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="status-dot bg-success-vibrant shadow-[0_0_6px_rgba(16,185,129,0.6)]"></span>
+<h4 class="font-label-md text-label-md text-on-surface font-bold">Cyber Samurai Ch. 42</h4>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Submitted: 2 hrs ago • 24 Pages</p>
+</div>
+</div>
+<button class="border border-secondary text-secondary hover:bg-secondary/10 font-label-md text-label-md px-4 py-2 rounded-DEFAULT transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">edit_note</span>
+                                    Review Dialogue
+                                </button>
+</div>
+<!-- Queue Item 2 -->
+<div class="data-table-row py-4 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-12 h-16 bg-surface-container-highest rounded border border-outline-variant overflow-hidden flex-shrink-0">
+<div class="w-full h-full bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-outline-variant">image</span>
+</div>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="status-dot bg-accent-gold shadow-[0_0_6px_rgba(255,208,102,0.6)]"></span>
+<h4 class="font-label-md text-label-md text-on-surface font-bold">Magic Academy Ch. 12</h4>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Submitted: 5 hrs ago • 30 Pages</p>
+</div>
+</div>
+<button class="border border-secondary text-secondary hover:bg-secondary/10 font-label-md text-label-md px-4 py-2 rounded-DEFAULT transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">edit_note</span>
+                                    Review Dialogue
+                                </button>
+</div>
+<!-- Queue Item 3 -->
+<div class="data-table-row py-4 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-12 h-16 bg-surface-container-highest rounded border border-outline-variant overflow-hidden flex-shrink-0">
+<div class="w-full h-full bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-outline-variant">image</span>
+</div>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="status-dot bg-accent-gold shadow-[0_0_6px_rgba(255,208,102,0.6)]"></span>
+<h4 class="font-label-md text-label-md text-on-surface font-bold">Daily Life Ch. 05</h4>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Submitted: 1 day ago • 18 Pages</p>
+</div>
+</div>
+<button class="border border-secondary text-secondary hover:bg-secondary/10 font-label-md text-label-md px-4 py-2 rounded-DEFAULT transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">edit_note</span>
+                                    Review Dialogue
+                                </button>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+</body></html>
