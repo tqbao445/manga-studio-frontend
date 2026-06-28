@@ -1,539 +1,926 @@
-import { useEffect, useMemo, useState } from "react";
+﻿/**
+ * EditorialBoardDashboardPanel — "La bàn thị hiếu"
+ *
+ * Layout: 2 columns (xl)
+ *   LEFT  → Actionable Triggers
+ *             · Decision Hub   (họp xét duyệt + bỏ phiếu series)
+ *             · Axe List       (3-5 series chỉ số tệ nhất liên tục)
+ *   RIGHT → Insightful Statistics
+ *             · Reader Taste Radar (bảng xếp hạng với Double Tabs:
+ *                 Thời gian: Tuần / Tháng  ×  Góc nhìn: Theo Series / Theo Thể loại)
+ *
+ * APIs used:
+ *   · GET /api/meetings/user            → Decision Hub cards
+ *   · GET /api/ranking/at-risk          → Axe List (primary source)
+ *   · GET /api/series                   → enrich axe list + leaderboard
+ *   · GET /api/ranking/monthly          → Reader Taste Radar — monthly view
+ *   · GET /api/ranking/weekly           → Reader Taste Radar — weekly view
+ *
+ * ⚠️  Missing APIs (please request from backend):
+ *   · GET /api/ranking/consecutive-decline?periods=3
+ *       → Axe List: series with CONFIRMED 3-consecutive-period rank decline
+ *         (current fallback: derive from at-risk + DOWN trend in monthly data)
+ */
+
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
+  Gavel,
   AlertTriangle,
-  ArrowDownRight,
+  TrendingDown,
+  TrendingUp,
+  Minus,
+  BarChart3,
+  Calendar,
   ArrowUpRight,
-  BookOpen,
-  Clock3,
-  Newspaper,
-  PlayCircle,
-  Vote,
+  ArrowDownRight,
+  ChevronRight,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { Select } from "../../../shared/components/ui/select";
-import { Tabs } from "../../../shared/components/ui/tabs";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle,
 } from "../../../shared/components/ui/card";
 import { Button } from "../../../shared/components/ui/button";
 import { cn, formatDate } from "../../../shared/utils";
-import seriesService from "../../../services/seriesService";
+import { useAuthStore } from "../../../app/stores/authStore";
+import { useUIStore } from "../../../app/stores/uiStore";
+import meetingService from "../../../services/meetingService";
 import rankingService from "../../../services/rankingService";
-import { useEditorialStore } from "../../../app/stores/editorialStore";
+import seriesService from "../../../services/seriesService";
+import { CreateMeetingModal } from "../../editorial/components/CreateMeetingModal";
+import { ConfirmDecisionModal } from "../../editorial/components/ConfirmDecisionModal";
 
-const PLATFORM_OPTIONS = [
-  { value: "ALL", label: "All Platforms" },
-  { value: "Shonen Weekly", label: "Shonen Weekly" },
-  { value: "Seinen Monthly", label: "Seinen Monthly" },
-  { value: "Manga App", label: "Manga App" },
-];
-
-const LEADERBOARD_TABS = [
-  { value: "TOP_CHARTS", label: "Top Charts" },
-  { value: "BY_GENRE", label: "By Genre" },
-];
-
-const ACTIVE_SERIES_STATUSES = new Set([
-  "ONGOING",
-  "AT_RISK",
-  "HIATUS",
-  "PUBLISHED",
-]);
-
-function toNumberId(value) {
-  const numeric = Number(value);
-  return Number.isFinite(numeric) ? numeric : null;
-}
-
-function resolveRankingSeriesId(rank) {
-  return toNumberId(rank?.seriesId) || toNumberId(rank?.series?.id) || null;
-}
+// ─────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────
 
 function toArray(payload) {
   if (Array.isArray(payload)) return payload;
   if (Array.isArray(payload?.content)) return payload.content;
+  if (Array.isArray(payload?.data)) return payload.data;
   return [];
 }
 
-function resolvePlatform(series) {
-  if (series.publishFrequency === "WEEKLY") return "Shonen Weekly";
-  if (series.publishFrequency === "MONTHLY") return "Seinen Monthly";
-  return "Manga App";
+function toNumberId(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
 }
 
-function MetricCard({ title, value, subtitle, tone = "default", icon: Icon }) {
+function currentMonthStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function currentWeekStr() {
+  const now = new Date();
+  const jan1 = new Date(now.getFullYear(), 0, 1);
+  const weekNum = Math.ceil(
+    ((now - jan1) / 86_400_000 + jan1.getDay() + 1) / 7,
+  );
+  return `${now.getFullYear()}-W${String(weekNum).padStart(2, "0")}`;
+}
+
+// ─────────────────────────────────────────────
+// Shared UI atoms
+// ─────────────────────────────────────────────
+
+function BlockHeader({
+  icon: Icon,
+  title,
+  badge,
+  iconClass = "text-primary",
+  subtitle,
+}) {
   return (
-    <Card className="border-outline-variant/30 bg-gradient-to-br from-surface-container to-surface-container-low/70">
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">
-              {title}
-            </p>
-            <p
-              className={cn(
-                "mt-2 text-3xl font-semibold tabular-nums",
-                tone === "warning"
-                  ? "text-accent-gold"
-                  : tone === "danger"
-                    ? "text-status-danger"
-                    : "text-on-surface",
-              )}
-            >
-              {value}
-            </p>
-            {subtitle && (
-              <p className="mt-1 text-xs text-on-surface-variant">{subtitle}</p>
-            )}
-          </div>
-          <div
-            className={cn(
-              "rounded-2xl border p-3",
-              tone === "warning"
-                ? "border-accent-gold/20 bg-accent-gold/10 text-accent-gold"
-                : tone === "danger"
-                  ? "border-status-danger/20 bg-status-danger/10 text-status-danger"
-                  : "border-primary/20 bg-primary/10 text-primary",
-            )}
-          >
-            <Icon size={20} />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="mb-1">
+      <div className="flex items-center justify-between">
+        <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant">
+          <Icon size={14} className={iconClass} />
+          {title}
+        </h3>
+        {badge != null && (
+          <span className="rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-bold text-primary">
+            {badge}
+          </span>
+        )}
+      </div>
+      {subtitle && (
+        <p className="mt-1 text-[11px] text-on-surface-variant">{subtitle}</p>
+      )}
+    </div>
   );
 }
 
-function LeaderboardRow({ entry }) {
-  const series = entry.series;
-  if (!series) return null;
-  const cancelled = series.status === "CANCELLED";
-  const trendUp = entry.trend === "UP";
+function EmptySlot({ message }) {
+  return (
+    <div className="rounded-2xl border border-dashed border-outline-variant/30 px-4 py-8 text-center text-sm text-on-surface-variant">
+      {message}
+    </div>
+  );
+}
+
+function SkeletonRows({ count = 3, height = "h-24" }) {
+  return (
+    <div className="space-y-3">
+      {Array.from({ length: count }, (_, i) => (
+        <div
+          key={i}
+          className={cn(
+            "animate-pulse rounded-2xl bg-surface-container-high/50",
+            height,
+          )}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Decision Hub — meeting cards
+// ─────────────────────────────────────────────
+
+function MeetingCard({ meeting }) {
+  const navigate = useNavigate();
+  const isPending = meeting.status === "PENDING";
+  const isLive = meeting.status === "IN_PROGRESS";
+  const pendingCount =
+    meeting.voteSummary?.pendingCount ?? meeting.pendingVotes ?? 0;
+  const scheduledAt =
+    meeting.scheduledAt ?? meeting.startAt ?? meeting.createdAt;
 
   return (
-    <tr
+    <div
       className={cn(
-        "border-b border-white/5 hover:bg-white/[0.02] transition-colors",
-        cancelled && "opacity-40",
+        "group rounded-2xl border p-5 transition-all duration-200",
+        "hover:-translate-y-0.5 hover:shadow-xl",
+        isPending
+          ? "border-accent-gold/30 bg-accent-gold/5 hover:border-accent-gold/60"
+          : isLive
+            ? "border-sky-400/30 bg-sky-500/5 hover:border-sky-400/60"
+            : "border-outline-variant/25 bg-surface-container-low/50 hover:border-primary/20",
       )}
     >
-      <td className="py-4 px-4 text-center text-sm font-semibold text-accent-gold">
-        #{entry.rank}
-      </td>
-      <td className="py-4 px-4">
-        <div className="flex items-center gap-4">
-          <div
-            className="w-12 h-16 rounded-lg border border-outline-variant/20 overflow-hidden bg-surface-container-high text-[10px] font-semibold text-white flex items-center justify-center"
-            style={{ background: series.coverColor || "#7c3aed" }}
-          >
-            {series.coverImageUrl ? (
-              <img
-                src={series.coverImageUrl}
-                alt={series.title}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              series.title
-                .split(" ")
-                .map((word) => word[0])
-                .join("")
-                .slice(0, 3)
-            )}
-          </div>
-          <div className="min-w-0">
-            <p
-              className={cn(
-                "text-sm font-semibold text-on-surface truncate",
-                cancelled && "line-through",
-              )}
-            >
-              {series.title}
-            </p>
-            <p className="text-xs text-on-surface-variant mt-1">
-              {series.platform} · {series.genres?.[0] || "—"}
-            </p>
-          </div>
-        </div>
-      </td>
-      <td className="py-4 px-4 text-right text-sm font-medium text-on-surface">
-        {(entry.totalVotes || 0).toLocaleString()}
-      </td>
-      <td className="py-4 px-4 text-center">
+      {/* Status badges */}
+      <div className="mb-3 flex flex-wrap items-center gap-2">
         <span
           className={cn(
-            "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border",
-            trendUp
-              ? "border-status-success/20 bg-status-success/10 text-status-success"
-              : entry.trend === "DOWN"
-                ? "border-status-danger/20 bg-status-danger/10 text-status-danger"
-                : "border-outline-variant/30 bg-white/5 text-on-surface-variant",
+            "rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+            isPending
+              ? "bg-accent-gold/15 text-accent-gold"
+              : isLive
+                ? "bg-sky-500/15 text-sky-300"
+                : "bg-outline-variant/20 text-on-surface-variant",
           )}
         >
-          {trendUp ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}{" "}
-          {entry.trend || "FLAT"}
+          {isPending ? "Vote Open" : isLive ? "Meeting Live" : "Completed"}
         </span>
-      </td>
-      <td className="py-4 px-4 text-right">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 px-3 text-xs text-on-surface-variant hover:bg-white/5 hover:text-on-surface"
-        >
-          Review
-        </Button>
-      </td>
-    </tr>
+        {isPending && pendingCount > 0 && (
+          <span className="rounded-full bg-status-danger/15 px-2 py-0.5 text-[10px] font-bold text-status-danger">
+            {pendingCount} pending
+          </span>
+        )}
+      </div>
+
+      {/* Title */}
+      <p className="line-clamp-2 text-sm font-semibold leading-snug text-on-surface">
+        {meeting.title}
+      </p>
+
+      {/* Time */}
+      {scheduledAt && (
+        <p className="mt-1.5 flex items-center gap-1 text-xs text-on-surface-variant">
+          <Calendar size={11} />
+          {formatDate(scheduledAt, { hour: "2-digit", minute: "2-digit" })}
+        </p>
+      )}
+
+      {/* CTA */}
+      {(isPending || isLive) && (
+        <div className="mt-4 flex justify-end">
+          {isPending ? (
+            <Button
+              size="sm"
+              className="h-8 bg-accent-gold px-4 text-xs font-bold text-black hover:bg-accent-gold/90"
+              onClick={() => navigate(`/editorial/${meeting.id}/vote`)}
+            >
+              <Gavel size={13} className="mr-1.5" />
+              Bỏ phiếu ngay
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 border-sky-400/40 px-4 text-xs text-sky-300 hover:bg-sky-500/10"
+              onClick={() => navigate("/editorial")}
+            >
+              Vào phòng họp
+              <ChevronRight size={13} className="ml-1" />
+            </Button>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
-function SessionCard({ session }) {
-  const isVoting = session.status === "PENDING";
-  const isInProgress = session.status === "IN_PROGRESS";
-  const isCompleted = session.status === "COMPLETED";
-
+function DecisionHub({ meetings, isLoading }) {
+  if (isLoading) return <SkeletonRows count={2} />;
+  if (!meetings.length)
+    return <EmptySlot message="No meetings scheduled. All clear." />;
   return (
-    <div className="rounded-2xl border border-outline-variant/25 bg-surface-container-low/50 p-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="px-2.5 py-1 rounded-full border border-primary/20 bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-[0.18em]">
-          [{session.platformLabel}]
-        </span>
-        <span
-          className={cn(
-            "px-2.5 py-1 rounded-full border text-[10px] font-semibold uppercase tracking-[0.18em]",
-            isVoting
-              ? "border-accent-gold/30 bg-accent-gold/10 text-accent-gold"
-              : isInProgress
-                ? "border-sky-500/30 bg-sky-500/10 text-sky-300"
-                : isCompleted
-                  ? "border-status-success/30 bg-status-success/10 text-status-success"
-                  : "border-outline-variant/30 bg-white/5 text-on-surface-variant",
-          )}
-        >
-          {session.statusLabel}
-        </span>
-      </div>
-      <h4 className="mt-3 text-base font-semibold text-on-surface">
-        {session.title}
-      </h4>
-      <p className="mt-1 text-xs text-on-surface-variant">
-        {formatDate(session.scheduledAt, {
-          hour: "2-digit",
-          minute: "2-digit",
-        })}
-      </p>
+    <div className="max-h-[480px] space-y-4 overflow-y-auto pr-1">
+      {meetings.map((m) => (
+        <MeetingCard key={m.id} meeting={m} />
+      ))}
+    </div>
+  );
+}
 
-      <div className="mt-4 flex items-center justify-between">
-        <span className="text-xs text-on-surface-variant">
-          {isVoting
-            ? `${session.pendingCount || 0} Pending`
-            : isInProgress
-              ? "Meeting is live"
-              : isCompleted
-                ? "Completed"
-                : "Pending"}
-        </span>
-        {isVoting ? (
+function ExecutiveQueueItem({ item, onCreateMeeting, onFinalizeDecision }) {
+  return (
+    <div className="rounded-2xl border border-outline-variant/25 bg-surface-container-low/50 p-4 transition-all hover:border-primary/40 hover:bg-surface-container-high/20">
+      <div className="flex items-center gap-3">
+        <div className="h-12 w-12 overflow-hidden rounded-xl border border-outline-variant/30 bg-surface-container-high">
+          {item.coverImageUrl ? (
+            <img
+              src={item.coverImageUrl}
+              alt={item.seriesTitle}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-sm font-bold text-primary">
+              {item.seriesTitle?.slice(0, 1)?.toUpperCase() || "S"}
+            </div>
+          )}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-lg font-semibold text-on-surface">
+            {item.seriesTitle}
+          </p>
+          <p className="text-sm text-on-surface-variant">
+            Tantou: {item.tantouName}
+          </p>
+        </div>
+
+        {item.mode === "EB_PENDING" ? (
+          <span className="rounded-lg bg-indigo-500/15 px-2 py-1 text-xs font-semibold text-indigo-300">
+            EB Pending
+          </span>
+        ) : (
+          <span className="rounded-lg bg-emerald-500/15 px-2 py-1 text-xs font-semibold text-emerald-300">
+            Voting Completed
+          </span>
+        )}
+      </div>
+
+      <div className="mt-4 flex justify-end">
+        {item.mode === "EB_PENDING" ? (
           <Button
             size="sm"
-            className="h-8 px-3 text-xs bg-primary text-on-primary hover:bg-primary/90"
+            className="bg-primary px-4 text-xs font-semibold text-on-primary hover:bg-primary/90"
+            onClick={() => onCreateMeeting(item)}
           >
-            Vote Now ({session.pendingCount || 0} Pending)
+            Tạo cuộc họp
           </Button>
-        ) : isInProgress ? (
+        ) : (
           <Button
             size="sm"
-            variant="outline"
-            className="h-8 px-3 text-xs border-outline-variant/40 text-on-surface hover:bg-white/5"
+            className="bg-rose-200 px-4 text-xs font-semibold text-rose-900 hover:bg-rose-300"
+            onClick={() => onFinalizeDecision(item)}
           >
-            Join Room
+            Quyết định cuối
           </Button>
-        ) : null}
+        )}
       </div>
     </div>
   );
 }
 
+// ─────────────────────────────────────────────
+// Axe List widget
+// ─────────────────────────────────────────────
+
+function AxeRow({ series, rank }) {
+  const navigate = useNavigate();
+  return (
+    <div
+      className="group flex cursor-pointer items-center gap-3 rounded-2xl border border-status-danger/20 bg-status-danger/5 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-status-danger/50 hover:bg-status-danger/10 hover:shadow-lg"
+      onClick={() => navigate(`/series/${series.id}`)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === "Enter" && navigate(`/series/${series.id}`)}
+    >
+      {/* Cover thumbnail */}
+      <div
+        className="flex h-12 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 text-[8px] font-bold text-white"
+        style={{ background: series.coverColor ?? "#7c3aed" }}
+      >
+        {series.coverImageUrl ? (
+          <img
+            src={series.coverImageUrl}
+            alt={series.title}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          series.title
+            ?.split(" ")
+            .map((w) => w[0])
+            .join("")
+            .slice(0, 2)
+        )}
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold text-on-surface">
+          {series.title}
+        </p>
+        <p className="mt-0.5 text-xs text-on-surface-variant">
+          {series.genre ?? series.genres?.[0] ?? "—"}
+          {rank?.rank != null ? ` · Rank #${rank.rank}` : ""}
+        </p>
+      </div>
+
+      <div className="flex shrink-0 items-center gap-2">
+        <TrendingDown size={16} className="text-status-danger" />
+        <ChevronRight
+          size={14}
+          className="text-on-surface-variant opacity-0 transition-opacity group-hover:opacity-100"
+        />
+      </div>
+    </div>
+  );
+}
+
+function AxeList({ axeList, isLoading }) {
+  if (isLoading) return <SkeletonRows count={3} height="h-16" />;
+  if (!axeList.length)
+    return <EmptySlot message="No series flagged for removal." />;
+  return (
+    <div className="space-y-3">
+      {axeList.map(({ series, rank }) =>
+        series ? <AxeRow key={series.id} series={series} rank={rank} /> : null,
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Reader Taste Radar — Double Tabs leaderboard
+// ─────────────────────────────────────────────
+
+const TIME_OPTIONS = [
+  { value: "week", label: "This Week" },
+  { value: "month", label: "This Month" },
+];
+
+const VIEW_OPTIONS = [
+  { value: "series", label: "By Series" },
+  { value: "genre", label: "By Genre" },
+];
+
+function DoubleTabs({ timeTab, viewTab, onTime, onView }) {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      {/* Time selector */}
+      <div className="flex gap-1 rounded-xl border border-outline-variant/25 bg-surface-container p-1">
+        {TIME_OPTIONS.map(({ value, label }) => (
+          <button
+            key={value}
+            onClick={() => onTime(value)}
+            className={cn(
+              "rounded-lg px-3 py-1.5 text-xs font-medium transition-all",
+              timeTab === value
+                ? "bg-primary text-on-primary shadow-sm"
+                : "text-on-surface-variant hover:bg-white/5 hover:text-on-surface",
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* View selector */}
+      <div className="flex gap-1 rounded-xl border border-outline-variant/25 bg-surface-container p-1">
+        {VIEW_OPTIONS.map(({ value, label }) => (
+          <button
+            key={value}
+            onClick={() => onView(value)}
+            className={cn(
+              "rounded-lg px-3 py-1.5 text-xs font-medium transition-all",
+              viewTab === value
+                ? "bg-primary text-on-primary shadow-sm"
+                : "text-on-surface-variant hover:bg-white/5 hover:text-on-surface",
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function LeaderboardBySeries({ entries }) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="min-w-full text-left">
+        <thead className="border-b border-outline-variant/20 bg-surface-container-low/50">
+          <tr className="text-[10px] uppercase tracking-[0.18em] text-on-surface-variant">
+            <th className="px-4 py-3 text-center">Rank</th>
+            <th className="px-4 py-3">Series</th>
+            <th className="px-4 py-3 text-right">Votes</th>
+            <th className="px-4 py-3 text-center">Trend</th>
+          </tr>
+        </thead>
+        <tbody>
+          {entries.map((entry) => {
+            const up = entry.trend === "UP";
+            const down = entry.trend === "DOWN";
+            return (
+              <tr
+                key={entry.id ?? `${entry.seriesId}-${entry.rank}`}
+                className="border-b border-white/5 transition-colors hover:bg-white/[0.03]"
+              >
+                <td className="px-4 py-3.5 text-center text-sm font-bold text-accent-gold tabular-nums">
+                  #{entry.rank}
+                </td>
+                <td className="px-4 py-3.5">
+                  <p className="line-clamp-1 text-sm font-semibold text-on-surface">
+                    {entry.series?.title ?? "—"}
+                  </p>
+                  <p className="mt-0.5 text-xs text-on-surface-variant">
+                    {entry.series?.genre ?? entry.series?.genres?.[0] ?? "—"}
+                  </p>
+                </td>
+                <td className="px-4 py-3.5 text-right text-sm font-medium tabular-nums text-on-surface">
+                  {(entry.totalVotes ?? 0).toLocaleString()}
+                </td>
+                <td className="px-4 py-3.5 text-center">
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold",
+                      up
+                        ? "border-status-success/20 bg-status-success/10 text-status-success"
+                        : down
+                          ? "border-status-danger/20 bg-status-danger/10 text-status-danger"
+                          : "border-outline-variant/20 bg-white/5 text-on-surface-variant",
+                    )}
+                  >
+                    {up ? (
+                      <ArrowUpRight size={12} />
+                    ) : down ? (
+                      <ArrowDownRight size={12} />
+                    ) : (
+                      <Minus size={12} />
+                    )}
+                    {entry.trend ?? "FLAT"}
+                  </span>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function LeaderboardByGenre({ items }) {
+  return (
+    <div className="space-y-2 p-4">
+      {items.map((item, idx) => (
+        <div
+          key={item.genre}
+          className="flex items-center gap-4 rounded-xl border border-outline-variant/20 bg-surface-container-low/40 px-4 py-3 transition-colors hover:bg-surface-container-high/30"
+        >
+          <span className="w-6 text-center text-sm font-bold tabular-nums text-accent-gold">
+            {idx + 1}
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-on-surface">
+              {item.genre}
+            </p>
+            <p className="text-xs text-on-surface-variant">
+              {item.seriesCount} series · Best rank #{item.bestRank}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-sm font-bold tabular-nums text-primary">
+              {item.totalVotes.toLocaleString()}
+            </p>
+            <p className="text-[10px] text-on-surface-variant">votes</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ReaderTasteRadar({
+  timeTab,
+  viewTab,
+  seriesRows,
+  weeklyRanks,
+  monthlyRanks,
+}) {
+  const ranks = timeTab === "week" ? weeklyRanks : monthlyRanks;
+
+  const tableData = useMemo(() => {
+    if (viewTab === "series") {
+      return ranks
+        .map((r) => {
+          const sid = toNumberId(r.seriesId) || toNumberId(r.series?.id);
+          return {
+            ...r,
+            series: seriesRows.find((s) => s.id === sid),
+          };
+        })
+        .filter((r) => r.series)
+        .sort((a, b) => (a.rank ?? 99) - (b.rank ?? 99))
+        .slice(0, 20);
+    }
+
+    // By Genre: group by genre, aggregate votes
+    const genreMap = {};
+    ranks.forEach((r) => {
+      const sid = toNumberId(r.seriesId) || toNumberId(r.series?.id);
+      const series = seriesRows.find((s) => s.id === sid);
+      if (!series) return;
+      const genre = series.genre ?? series.genres?.[0] ?? "Other";
+      if (!genreMap[genre]) {
+        genreMap[genre] = {
+          genre,
+          totalVotes: 0,
+          seriesCount: 0,
+          bestRank: r.rank ?? 99,
+        };
+      }
+      genreMap[genre].totalVotes += r.totalVotes ?? 0;
+      genreMap[genre].seriesCount += 1;
+      if ((r.rank ?? 99) < genreMap[genre].bestRank) {
+        genreMap[genre].bestRank = r.rank ?? 99;
+      }
+    });
+
+    return Object.values(genreMap)
+      .sort((a, b) => b.totalVotes - a.totalVotes)
+      .slice(0, 10);
+  }, [ranks, seriesRows, viewTab]);
+
+  if (!tableData.length)
+    return (
+      <div className="px-4 py-12 text-center text-sm text-on-surface-variant">
+        No ranking data available for this period.
+      </div>
+    );
+
+  return viewTab === "series" ? (
+    <LeaderboardBySeries entries={tableData} />
+  ) : (
+    <LeaderboardByGenre items={tableData} />
+  );
+}
+
+// ─────────────────────────────────────────────
+// Root export
+// ─────────────────────────────────────────────
+
 export function EditorialBoardDashboardPanel() {
-  const [selectedPlatform, setSelectedPlatform] = useState("ALL");
-  const [activeTab, setActiveTab] = useState("TOP_CHARTS");
+  const queryClient = useQueryClient();
+  const user = useAuthStore((s) => s.user);
+  const addToast = useUIStore((s) => s.addToast);
+  const [timeTab, setTimeTab] = useState("month");
+  const [viewTab, setViewTab] = useState("series");
+  const [showCreateMeeting, setShowCreateMeeting] = useState(false);
+  const [selectedDecisionItem, setSelectedDecisionItem] = useState(null);
 
-  const meetings = useEditorialStore((state) => state.meetings);
-  const fetchMeetings = useEditorialStore((state) => state.fetchMeetings);
+  const isChiefEditor = user?.role === "CHIEF_EDITOR";
 
-  useEffect(() => {
-    fetchMeetings();
-  }, [fetchMeetings]);
-
-  const { data: seriesRows = [] } = useQuery({
-    queryKey: ["dashboard", "editorial", "series"],
+  const { data: rawMeetings = [], isLoading: meetingsLoading } = useQuery({
+    queryKey: ["dashboard", "meetings"],
     queryFn: async () => {
-      const payload = await seriesService.getAll({ page: 0, size: 100 });
-      return toArray(payload).map((series) => ({
-        ...series,
-        platform: resolvePlatform(series),
-      }));
+      const payload = await meetingService.getForUser();
+      return toArray(payload);
     },
     staleTime: 30_000,
   });
 
-  const { data: rankingRows = [] } = useQuery({
-    queryKey: ["dashboard", "editorial", "rankings", "monthly"],
+  const { data: atRiskData = [], isLoading: atRiskLoading } = useQuery({
+    queryKey: ["dashboard", "at-risk"],
     queryFn: async () => {
-      const now = new Date();
-      const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-      const payload = await rankingService.getMonthly(month);
+      const payload = await rankingService.getAtRisk();
+      return toArray(payload);
+    },
+    staleTime: 120_000,
+  });
+
+  const { data: allSeries = [] } = useQuery({
+    queryKey: ["dashboard", "editorial", "series"],
+    queryFn: async () => {
+      const payload = await seriesService.getAll({ page: 0, size: 100 });
       return toArray(payload);
     },
     staleTime: 60_000,
   });
 
-  const scopedSeries = useMemo(() => {
-    if (selectedPlatform === "ALL") return seriesRows;
-    return seriesRows.filter((series) => series.platform === selectedPlatform);
-  }, [selectedPlatform, seriesRows]);
+  const { data: monthlyRanks = [] } = useQuery({
+    queryKey: ["dashboard", "rankings", "monthly", currentMonthStr()],
+    queryFn: async () => {
+      const payload = await rankingService.getMonthly(currentMonthStr());
+      return toArray(payload);
+    },
+    staleTime: 120_000,
+  });
 
-  const scopedSeriesIds = useMemo(
-    () => new Set(scopedSeries.map((series) => series.id)),
-    [scopedSeries],
-  );
+  const { data: weeklyRanks = [] } = useQuery({
+    queryKey: ["dashboard", "rankings", "weekly", currentWeekStr()],
+    queryFn: async () => {
+      const payload = await rankingService.getWeekly(currentWeekStr());
+      return toArray(payload);
+    },
+    staleTime: 120_000,
+  });
 
-  const leaderboard = useMemo(() => {
-    const merged = rankingRows
-      .filter((rank) => scopedSeriesIds.has(resolveRankingSeriesId(rank)))
-      .map((rank) => ({
-        ...rank,
-        series: scopedSeries.find(
-          (series) => series.id === resolveRankingSeriesId(rank),
-        ),
-      }))
-      .filter((entry) => entry.series);
+  // Sort meetings: pending first, then live, then completed
+  const sortedMeetings = useMemo(() => {
+    const order = { PENDING: 0, IN_PROGRESS: 1, COMPLETED: 2 };
+    return [...rawMeetings].sort(
+      (a, b) => (order[a.status] ?? 3) - (order[b.status] ?? 3),
+    );
+  }, [rawMeetings]);
 
-    if (activeTab === "BY_GENRE") {
-      return merged.sort(
-        (left, right) =>
-          (left.series.genres?.[0] || "").localeCompare(
-            right.series.genres?.[0] || "",
-          ) || left.rank - right.rank,
-      );
-    }
-    if (activeTab === "TOP_GAINERS") {
-      return merged
-        .filter((entry) => entry.trend === "UP")
-        .sort((left, right) => left.rank - right.rank);
-    }
-    if (activeTab === "TOP_LOSERS") {
-      return merged
-        .filter((entry) => entry.trend === "DOWN")
-        .sort((left, right) => right.rank - left.rank);
-    }
-    return merged.sort((left, right) => left.rank - right.rank);
-  }, [activeTab, rankingRows, scopedSeries, scopedSeriesIds]);
-
-  const proposalsPending = scopedSeries.filter(
-    (series) => series.status === "PENDING_APPROVAL",
+  const activeMeetingCount = sortedMeetings.filter(
+    (m) => m.status !== "COMPLETED",
   ).length;
-  const activeSeries = scopedSeries.filter((series) =>
-    ACTIVE_SERIES_STATUSES.has(series.status),
-  ).length;
-  const readerVotes = leaderboard.reduce(
-    (sum, entry) => sum + (entry.totalVotes || 0),
-    0,
-  );
 
-  const axeList = leaderboard
-    .filter(
-      (entry) => entry.trend === "DOWN" || entry.series.status === "CANCELLED",
-    )
-    .sort((left, right) => right.rank - left.rank)
-    .slice(0, 4)
-    .map((entry) => entry.series);
+  const finalizeDecisionMutation = useMutation({
+    mutationFn: ({ meetingId, decision }) =>
+      meetingService.makeDecision(meetingId, { decision }),
+    onSuccess: () => {
+      addToast({
+        title: "Final decision submitted",
+        description: "Series decision has been updated successfully.",
+        variant: "success",
+      });
+      setSelectedDecisionItem(null);
+      queryClient.invalidateQueries({ queryKey: ["dashboard", "meetings"] });
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard", "editorial", "series"],
+      });
+    },
+    onError: () => {
+      addToast({
+        title: "Failed to submit decision",
+        description: "Please try again.",
+        variant: "error",
+      });
+    },
+  });
 
-  const sessions = useMemo(() => {
-    const mapped = meetings.map((meeting) => ({
-      ...meeting,
-      platform: meeting.platform || "Manga App",
-      platformLabel: meeting.platform || "Digital App",
-      statusLabel:
-        meeting.status === "PENDING"
-          ? "Voting Active"
-          : meeting.status === "IN_PROGRESS"
-            ? "In Progress"
-            : meeting.status === "COMPLETED"
-              ? "Completed"
-              : "Pending",
-      pendingCount:
-        meeting.voteSummary?.pendingCount || meeting.pendingVotes || 0,
-      scheduledAt:
-        meeting.scheduledAt || meeting.startAt || new Date().toISOString(),
-    }));
+  const executiveQueue = useMemo(() => {
+    const completedBySeries = new Map();
+    sortedMeetings
+      .filter((meeting) => meeting.status === "COMPLETED" && !meeting.decision)
+      .forEach((meeting) => {
+        const sid = toNumberId(meeting.seriesId);
+        if (sid != null) completedBySeries.set(sid, meeting);
+      });
 
-    if (selectedPlatform === "ALL") return mapped;
-    return mapped.filter((meeting) => meeting.platform === selectedPlatform);
-  }, [meetings, selectedPlatform]);
+    const hasMeetingSeries = new Set(
+      sortedMeetings
+        .map((meeting) => toNumberId(meeting.seriesId))
+        .filter((v) => v != null),
+    );
+
+    const ebPending = allSeries
+      .filter((series) => series.status === "PENDING_BOARD_VOTE")
+      .filter((series) => !hasMeetingSeries.has(series.id))
+      .map((series) => ({
+        mode: "EB_PENDING",
+        seriesId: series.id,
+        seriesTitle: series.title,
+        coverImageUrl: series.coverImageUrl,
+        tantouName:
+          series?.tantouEditor?.displayName ||
+          series?.tantouEditor?.username ||
+          "Unassigned Tantou",
+      }));
+
+    const votingCompleted = Array.from(completedBySeries.entries()).map(
+      ([seriesId, meeting]) => {
+        const series = allSeries.find((s) => s.id === seriesId);
+        return {
+          mode: "VOTING_COMPLETED",
+          seriesId,
+          seriesTitle:
+            meeting.seriesTitle || series?.title || `Series #${seriesId}`,
+          coverImageUrl: series?.coverImageUrl,
+          tantouName:
+            series?.tantouEditor?.displayName ||
+            series?.tantouEditor?.username ||
+            "Unknown Tantou",
+          meeting,
+        };
+      },
+    );
+
+    return [...ebPending, ...votingCompleted];
+  }, [allSeries, sortedMeetings]);
+
+  const handleCreateMeeting = () => {
+    setShowCreateMeeting(true);
+  };
+
+  const handleFinalizeDecision = (item) => {
+    setSelectedDecisionItem(item);
+  };
+
+  const decisionSummary = useMemo(() => {
+    if (!selectedDecisionItem?.meeting) return { yes: 0, no: 0, approval: 0 };
+    const vs = selectedDecisionItem.meeting.voteSummary || {};
+    const yes = vs.yesCount ?? 0;
+    const no = vs.noCount ?? 0;
+    const total = vs.totalVotes || yes + no;
+    const approval = total > 0 ? Math.round((yes / total) * 100) : 0;
+    return { yes, no, approval };
+  }, [selectedDecisionItem]);
+
+  // Build axe list: prefer dedicated at-risk API, fallback to DOWN trend
+  const axeList = useMemo(() => {
+    if (atRiskData.length > 0) {
+      return atRiskData.slice(0, 5).map((item) => {
+        const sid =
+          toNumberId(item.seriesId) ??
+          toNumberId(item.series?.id) ??
+          toNumberId(item.id);
+        const series =
+          allSeries.find((s) => s.id === sid) ?? item.series ?? item;
+        const rank = monthlyRanks.find(
+          (r) => (toNumberId(r.seriesId) || toNumberId(r.series?.id)) === sid,
+        );
+        return { series, rank };
+      });
+    }
+    // ⚠️ Fallback: derive from monthly rankings — requests consecutive-decline API from backend
+    return monthlyRanks
+      .filter((r) => r.trend === "DOWN")
+      .sort((a, b) => (b.rank ?? 0) - (a.rank ?? 0))
+      .slice(0, 5)
+      .map((r) => {
+        const sid = toNumberId(r.seriesId) || toNumberId(r.series?.id);
+        const series = allSeries.find((s) => s.id === sid) ?? r.series;
+        return { series: series ?? { id: sid, title: "Unknown" }, rank: r };
+      })
+      .filter((item) => item.series?.title !== "Unknown");
+  }, [atRiskData, allSeries, monthlyRanks]);
 
   return (
-    <div className="space-y-8 pb-10">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+    <>
+      <div className="space-y-8 pb-12">
+        {/* Header */}
         <div>
           <p className="text-xs uppercase tracking-[0.24em] text-on-surface-variant">
-            Editorial Dashboard
+            Editorial Board
           </p>
           <h2 className="mt-1 text-3xl font-semibold tracking-tight text-on-surface">
-            Editorial Board
+            Board Command Center
           </h2>
-          <p className="mt-2 text-sm text-on-surface-variant">
-            Using backend sources for series, rankings, and meetings.
+          <p className="mt-1 text-sm text-on-surface-variant">
+            Voting decisions, axe list, and reader taste intelligence.
           </p>
         </div>
-        <div className="w-full lg:w-[280px]">
-          <Select
-            value={selectedPlatform}
-            onChange={(event) => setSelectedPlatform(event.target.value)}
-            options={PLATFORM_OPTIONS}
-            className="rounded-xl border-outline-variant/30 bg-surface-container text-on-surface"
-          />
-        </div>
-      </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <MetricCard
-          title="Total Active Series"
-          value={activeSeries}
-          subtitle="Across selected platform"
-          icon={BookOpen}
-        />
-        <MetricCard
-          title="Proposals Pending"
-          value={proposalsPending}
-          subtitle="Series in review"
-          icon={AlertTriangle}
-          tone={proposalsPending > 0 ? "warning" : "default"}
-        />
-        <MetricCard
-          title="Reader Votes"
-          value={readerVotes.toLocaleString()}
-          subtitle="Current period total"
-          icon={Vote}
-        />
-      </div>
-
-      <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
-        <Card className="border-outline-variant/30">
-          <CardHeader className="border-b border-outline-variant/20 bg-surface-container-low/40">
-            <div className="flex items-start justify-between gap-4">
-              <CardTitle className="flex items-center gap-2 text-xl">
-                <Newspaper size={18} className="text-primary" /> Master
-                Leaderboard
-              </CardTitle>
-            </div>
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              tabs={LEADERBOARD_TABS}
-            />
-          </CardHeader>
-          <CardContent className="overflow-x-auto p-0">
-            <table className="min-w-full text-left">
-              <thead className="border-b border-outline-variant/20 bg-surface-container-low/60 text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                <tr>
-                  <th className="px-4 py-4 text-center">Rank</th>
-                  <th className="px-4 py-4">Series</th>
-                  <th className="px-4 py-4 text-right">Reader Votes</th>
-                  <th className="px-4 py-4 text-center">Trend</th>
-                  <th className="px-4 py-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {leaderboard.map((entry) => (
-                  <LeaderboardRow
-                    key={entry.id || `${entry.seriesId}-${entry.rank}`}
-                    entry={entry}
+        {/* 2-column grid */}
+        <div className="grid gap-8 xl:grid-cols-2">
+          {/* LEFT — Actionable Triggers */}
+          <div className="space-y-8">
+            {isChiefEditor && (
+              <Card className="border-primary/25 bg-surface-container-low/40">
+                <CardHeader className="border-b border-outline-variant/20 pb-5">
+                  <BlockHeader
+                    icon={Gavel}
+                    title="Executive Decision Queue"
+                    badge={`${executiveQueue.length} Actions Required`}
+                    iconClass="text-primary"
+                    subtitle="Series in board approval workflow requiring Chief Editor action"
                   />
-                ))}
-                {leaderboard.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="px-4 py-12 text-center text-sm text-on-surface-variant"
-                    >
-                      No leaderboard data in this scope.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </CardContent>
-        </Card>
+                </CardHeader>
+                <CardContent className="pb-6 pt-5">
+                  {executiveQueue.length === 0 ? (
+                    <EmptySlot message="No executive actions required right now." />
+                  ) : (
+                    <div className="space-y-3">
+                      {executiveQueue.map((item) => (
+                        <ExecutiveQueueItem
+                          key={`${item.mode}-${item.seriesId}`}
+                          item={item}
+                          onCreateMeeting={handleCreateMeeting}
+                          onFinalizeDecision={handleFinalizeDecision}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
-        <div className="space-y-6">
-          <Card className="border-outline-variant/30">
-            <CardHeader className="border-b border-outline-variant/20 bg-surface-container-low/40">
-              <CardTitle className="flex items-center gap-2 text-xl">
-                <AlertTriangle size={18} className="text-status-danger" /> Axe
-                List Priority
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 p-4 md:p-6">
-              {axeList.map((series) => (
-                <div
-                  key={series.id}
-                  className="rounded-2xl border border-outline-variant/20 bg-surface-container-low/50 p-4 flex items-center justify-between gap-3"
-                >
-                  <div>
-                    <p
-                      className={cn(
-                        "text-sm font-medium text-on-surface",
-                        series.status === "CANCELLED" &&
-                          "line-through opacity-40",
-                      )}
-                    >
-                      {series.title}
-                    </p>
-                    <p className="text-xs text-on-surface-variant mt-1">
-                      {series.genres?.[0] || "—"}
-                    </p>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-8 px-3 text-xs border-status-danger/20 text-status-danger hover:bg-status-danger/10"
-                  >
-                    Review
-                  </Button>
-                </div>
-              ))}
-              {axeList.length === 0 && (
-                <div className="rounded-2xl border border-dashed border-outline-variant/30 p-6 text-center text-sm text-on-surface-variant">
-                  No at-risk series.
-                </div>
-              )}
-            </CardContent>
-          </Card>
+            {/* Decision Hub */}
+            <Card className="border-outline-variant/30 bg-surface-container-low/40">
+              <CardHeader className="border-b border-outline-variant/20 pb-5">
+                <BlockHeader
+                  icon={Gavel}
+                  title="Decision Hub"
+                  badge={activeMeetingCount}
+                  iconClass="text-accent-gold"
+                  subtitle="Pending votes and active board meetings requiring action"
+                />
+              </CardHeader>
+              <CardContent className="pb-6 pt-5">
+                <DecisionHub
+                  meetings={sortedMeetings}
+                  isLoading={meetingsLoading}
+                />
+              </CardContent>
+            </Card>
 
-          <Card className="border-outline-variant/30">
-            <CardHeader className="border-b border-outline-variant/20 bg-surface-container-low/40">
-              <CardTitle className="flex items-center gap-2 text-xl">
-                <PlayCircle size={18} className="text-primary" /> Upcoming
-                Sessions
-              </CardTitle>
+            {/* Axe List */}
+            <Card className="border-status-danger/20 bg-status-danger/5">
+              <CardHeader className="border-b border-status-danger/15 pb-5">
+                <BlockHeader
+                  icon={AlertTriangle}
+                  title="Axe List"
+                  badge={axeList.length}
+                  iconClass="text-status-danger"
+                  subtitle="Series with continuously declining metrics — board decision required"
+                />
+              </CardHeader>
+              <CardContent className="pb-6 pt-5">
+                <AxeList axeList={axeList} isLoading={atRiskLoading} />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* RIGHT — Reader Taste Radar */}
+          <Card className="border-outline-variant/30 bg-surface-container-low/40">
+            <CardHeader className="border-b border-outline-variant/20 pb-5">
+              <BlockHeader
+                icon={BarChart3}
+                title="Reader Taste Radar"
+                iconClass="text-primary"
+                subtitle="Market intelligence — reader preference by period and lens"
+              />
+              <div className="mt-4">
+                <DoubleTabs
+                  timeTab={timeTab}
+                  viewTab={viewTab}
+                  onTime={setTimeTab}
+                  onView={setViewTab}
+                />
+              </div>
             </CardHeader>
-            <CardContent className="space-y-3 p-4 md:p-6 max-h-[480px] overflow-y-auto">
-              {sessions.map((session) => (
-                <SessionCard key={session.id} session={session} />
-              ))}
-              {sessions.length === 0 && (
-                <div className="rounded-2xl border border-dashed border-outline-variant/30 p-6 text-center text-sm text-on-surface-variant">
-                  No sessions in this platform.
-                </div>
-              )}
+            <CardContent className="p-0">
+              <ReaderTasteRadar
+                timeTab={timeTab}
+                viewTab={viewTab}
+                seriesRows={allSeries}
+                weeklyRanks={weeklyRanks}
+                monthlyRanks={monthlyRanks}
+              />
             </CardContent>
           </Card>
         </div>
       </div>
-    </div>
+      {isChiefEditor && showCreateMeeting && (
+        <CreateMeetingModal
+          onClose={() => {
+            setShowCreateMeeting(false);
+            queryClient.invalidateQueries({
+              queryKey: ["dashboard", "meetings"],
+            });
+            queryClient.invalidateQueries({
+              queryKey: ["dashboard", "editorial", "series"],
+            });
+          }}
+        />
+      )}
+      {isChiefEditor && selectedDecisionItem?.meeting && (
+        <ConfirmDecisionModal
+          meeting={selectedDecisionItem.meeting}
+          seriesTitle={selectedDecisionItem.seriesTitle}
+          summary={decisionSummary}
+          onClose={() => setSelectedDecisionItem(null)}
+          onConfirm={async (decision) => {
+            await finalizeDecisionMutation.mutateAsync({
+              meetingId: selectedDecisionItem.meeting.id,
+              decision,
+            });
+          }}
+        />
+      )}
+    </>
   );
 }
 
