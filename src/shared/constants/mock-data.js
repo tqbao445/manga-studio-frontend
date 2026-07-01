@@ -377,11 +377,6 @@ export const mockTaskSubmissions = [
   { id: 902, taskId: 901, resultImageUrl: '', fileUrl: '', note: 'Chef protagonist initial submission.', version: 1, status: 'APPROVED', submittedAt: '2026-05-20T11:00:00Z' },
 ]
 
-export const mockTaskAttachments = [
-  { id: 1, taskId: 600, fileUrl: '', uploadedAt: '2026-04-12T10:00:00Z' },
-  { id: 2, taskId: 601, fileUrl: '', uploadedAt: '2026-04-12T10:00:00Z' },
-]
-
 export const mockLayers = {
   100: [
     { id: 1000, pageId: 100, label: 'Base Page', fileUrl: '', thumbnailUrl: '', sortOrder: 0, opacity: 1, visible: true, blendMode: 'normal', locked: false, createdBy: 1, createdAt: '2026-04-10' },

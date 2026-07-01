@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import {
   mockSeries, mockChapters, mockPages, mockRegions, mockTasks,
-  mockTaskSubmissions, mockTaskAttachments, mockLayers, mockComments,
+  mockTaskSubmissions, mockLayers, mockComments,
   mockAnnotations, mockRankings, mockDashboardStats,
   mockActivities, mockSchedules, mockUsers,
   mockBoardVotes,
@@ -74,13 +74,6 @@ export function useTaskSubmissions(taskId) {
     ? mockTaskSubmissions.filter(s => s.taskId === taskId)
     : mockTaskSubmissions
   return useAsyncData(() => delay(subs), [taskId])
-}
-
-export function useTaskAttachments(taskId) {
-  const atts = taskId
-    ? mockTaskAttachments.filter(a => a.taskId === taskId)
-    : mockTaskAttachments
-  return useAsyncData(() => delay(atts), [taskId])
 }
 
 export function useCommentsByPage(pageId) {

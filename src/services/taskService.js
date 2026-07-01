@@ -108,6 +108,23 @@ const taskService = {
   },
 
   /**
+   * Tạo một task cho nhiều regions.
+   * Endpoint: POST /api/tasks/batch
+   *
+   * @param {Object} data - { regionIds, title, description, notes, priority, dueDate, assistantId }
+   * @returns {Promise<Object>} TaskResponse vừa tạo
+   */
+  createBatch: async (data) => {
+    logApiCall('task', 'createBatch', {
+      regionIds: data?.regionIds,
+      assistantId: data?.assistantId,
+      priority: data?.priority,
+      dueDate: data?.dueDate,
+    });
+    return api.post('/tasks/batch', data);
+  },
+
+  /**
    * Cập nhật thông tin task (chỉ khi TODO hoặc REVISE).
    * Endpoint: PUT /api/tasks/{id}
    *
@@ -209,38 +226,6 @@ const taskService = {
   //  ATTACHMENTS
   // ═══════════════════════════════════════
 
-  /**
-   * Đính kèm file tham khảo vào task (MANGAKA gửi tài liệu cho ASSISTANT).
-   * Endpoint: POST /api/tasks/{taskId}/attachments
-   *
-   * ⚠️ Gửi multipart/form-data.
-   *    FormData: { file: File }
-   *
-   * @param {number} taskId - ID của task
-   * @param {FormData} formData - FormData chứa file
-   * @returns {Promise<Object>} AttachmentResponse
-   */
-  addAttachment: async (taskId, formData) => {
-    logApiCall('task', 'addAttachment', {
-      taskId,
-      fileName: formData?.get?.('file')?.name || null,
-    });
-    return api.post(`/tasks/${taskId}/attachments`, formData, {
-      timeout: 120000,
-    });
-  },
-
-  /**
-   * Xoá file đính kèm.
-   * Endpoint: DELETE /api/attachments/{id}
-   *
-   * @param {number} id - ID của attachment
-   * @returns {Promise<void>}
-   */
-  deleteAttachment: async (id) => {
-    logApiCall('task', 'deleteAttachment', { id });
-    return api.delete(`/attachments/${id}`);
-  },
 };
 
 export default taskService;

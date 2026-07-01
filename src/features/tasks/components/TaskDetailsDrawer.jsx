@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { X, Share2, MoreVertical, ArrowUpRight, Download, Eye, Flag, CalendarDays, Upload, Loader2 } from "lucide-react";
+import { X, Share2, MoreVertical, ArrowUpRight, Download, Flag, CalendarDays, Upload, Loader2 } from "lucide-react";
 import { Avatar } from "../../../shared/components/ui/avatar";
 import { cn, formatDate, forceDownload } from "../../../shared/utils";
 import { useAuthStore } from "../../../app/stores/authStore";
@@ -369,26 +369,6 @@ export function TaskDetailsDrawer({
                     className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
                   >
                     <Download size={14} /> Download Page
-                  </button>
-                )}
-                {task.referenceImageUrl && (
-                  <button
-                    onClick={() => handleDownload(task.referenceImageUrl, `ref-${task.id || "file"}.png`)}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
-                  >
-                    <Eye size={14} /> Reference Files
-                  </button>
-                )}
-                {(task.attachments?.length || 0) > 0 && (
-                  <button
-                    onClick={() => {
-                      const att = task.attachments[0];
-                      const url = att?.fileUrl || att?.url;
-                      if (url) handleDownload(url, att?.fileName || "attachment");
-                    }}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
-                  >
-                    <Eye size={14} /> Attachments ({task.attachments.length})
                   </button>
                 )}
               </section>
