@@ -103,7 +103,7 @@ export const useTaskStore = create((set, get) => ({
    */
   createTasksForRegions: async (regionIds, data) => {
     try {
-      await Promise.all(regionIds.map((id) => taskService.create(id, data)));
+      await taskService.createBatch({ ...data, regionIds });
       await Promise.all(regionIds.map((id) => get().loadTasks(id)));
     } catch (err) {
       console.error('[taskStore] createTasksForRegions failed:', err);
@@ -239,25 +239,6 @@ export const useTaskStore = create((set, get) => ({
       console.error('[taskStore] reviewSubmission failed:', err);
       set({ isSubmitting: false });
       return null;
-    }
-  },
-
-  // ═══════════════════════════════════════════
-  //  ATTACHMENTS — ASYNC ACTIONS
-  // ═══════════════════════════════════════════
-
-  /**
-   * Đính kèm file tham khảo vào task (MANGAKA gửi tài liệu cho ASSISTANT).
-   * Endpoint: POST /api/tasks/{taskId}/attachments (multipart)
-   *
-   * @param {number} taskId - ID của task
-   * @param {FormData} formData - FormData chứa file
-   */
-  addAttachment: async (taskId, formData) => {
-    try {
-      await taskService.addAttachment(taskId, formData);
-    } catch (err) {
-      console.error('[taskStore] addAttachment failed:', err);
     }
   },
 

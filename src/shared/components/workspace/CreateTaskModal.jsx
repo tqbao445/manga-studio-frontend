@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, CalendarDays, ChevronDown, Loader2, Eye, Upload } from "lucide-react";
+import { X, CalendarDays, ChevronDown, Loader2 } from "lucide-react";
 import { useWorkspaceStore } from "../../../app/stores/workspaceStore";
 import { cn } from "../../utils";
 import assistantService from "../../../services/assistantService";
@@ -28,7 +28,6 @@ export function CreateTaskModal({ open, regions, page, seriesId: propSeriesId, o
   const [dueDate, setDueDate] = useState("");
   const [description, setDescription] = useState("");
   const [notes, setNotes] = useState("");
-  const [attachments, setAttachments] = useState([]);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -228,40 +227,6 @@ export function CreateTaskModal({ open, regions, page, seriesId: propSeriesId, o
                 className="w-full h-10 px-3.5 text-sm bg-surface-container-high border border-outline-variant/20 rounded-lg outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 text-on-surface transition-all"
                 placeholder="Add metadata tags or internal notes..."
               />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant/60">Attachments &amp; References</label>
-              <div className="border-2 border-dashed border-outline-variant/20 rounded-xl p-5 flex flex-col items-center justify-center gap-3 bg-surface-container-low hover:bg-surface-container-high hover:border-primary/50 transition-all cursor-pointer">
-                <div className="flex gap-4 items-center">
-                  {attachments.length > 0 ? (
-                    <div className="w-16 h-16 rounded border border-outline-variant/20 bg-surface-container overflow-hidden group relative">
-                      <img src={URL.createObjectURL(attachments[0])} alt="" className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Eye size={18} className="text-white" />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="w-16 h-16 rounded-lg border border-outline-variant/20 bg-surface-container flex items-center justify-center">
-                      <Upload size={20} className="text-on-surface-variant/40" />
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-sm font-medium text-on-surface">Drag and drop assets</p>
-                    <p className="text-[11px] text-on-surface-variant/50">Max 50MB per file (JPG, PNG, TIFF)</p>
-                  </div>
-                </div>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/tiff"
-                  className="hidden"
-                  id="attachment-input"
-                  onChange={(e) => {
-                    if (e.target.files) setAttachments(Array.from(e.target.files));
-                  }}
-                />
-              </div>
-              <label htmlFor="attachment-input" className="cursor-pointer" />
             </div>
           </div>
         </div>

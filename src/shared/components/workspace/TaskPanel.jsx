@@ -37,7 +37,6 @@ import {
   Upload,
   Check,
   Clock,
-  Eye,
   Flag,
   Download,
   Loader2,
@@ -96,8 +95,6 @@ export function TaskPanel() {
   const [taskPriority, setTaskPriority] = useState("MEDIUM");
   const [taskDifficulty, setTaskDifficulty] = useState("MEDIUM");
   const [taskDeadline, setTaskDeadline] = useState("");
-  const [taskAttachments, setTaskAttachments] = useState([]);
-
   const [realAssistants, setRealAssistants] = useState([]);
   const [loadingAssistants, setLoadingAssistants] = useState(false);
   const [posting, setPosting] = useState(false);
@@ -206,7 +203,6 @@ export function TaskPanel() {
     setTaskPriority("MEDIUM");
     setTaskDifficulty("MEDIUM");
     setTaskDeadline("");
-    setTaskAttachments([]);
   };
 
   /**
@@ -863,19 +859,6 @@ export function TaskPanel() {
                         <Download size={12} /> Download Page
                       </button>
                     )}
-                    {st.referenceImageUrl && (
-                      <button
-                        onClick={() =>
-                          forceDownload(
-                            st.referenceImageUrl,
-                            `ref-${st.id || "file"}.png`,
-                          )
-                        }
-                        className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
-                      >
-                        <Eye size={12} /> Reference Files
-                      </button>
-                    )}
                     {user?.role === "ASSISTANT" &&
                       st.assistant?.id === user.id &&
                       canSubmit(st.status) &&
@@ -1341,57 +1324,6 @@ export function TaskPanel() {
                     onChange={(e) => setTaskNotes(e.target.value)}
                     placeholder="Reference sheets, color palettes, style notes..."
                     className="w-full h-10 px-3.5 text-sm bg-surface-container-high border border-outline-variant/20 rounded-lg outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 text-on-surface transition-all"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant/60">
-                    Attachments &amp; References
-                  </label>
-                  <div className="border-2 border-dashed border-outline-variant/20 rounded-xl p-5 flex flex-col items-center justify-center gap-3 bg-surface-container-low hover:bg-surface-container-high hover:border-primary/50 transition-all cursor-pointer">
-                    <div className="flex gap-4 items-center">
-                      {taskAttachments.length > 0 ? (
-                        <div className="w-16 h-16 rounded border border-outline-variant/20 bg-surface-container overflow-hidden group relative">
-                          <img
-                            src={URL.createObjectURL(taskAttachments[0])}
-                            alt=""
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Eye size={18} className="text-white" />
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="w-16 h-16 rounded-lg border border-outline-variant/20 bg-surface-container flex items-center justify-center">
-                          <Upload
-                            size={20}
-                            className="text-on-surface-variant/40"
-                          />
-                        </div>
-                      )}
-                      <div>
-                        <p className="text-sm font-medium text-on-surface">
-                          Drag and drop assets
-                        </p>
-                        <p className="text-[11px] text-on-surface-variant/50">
-                          Max 50MB per file (JPG, PNG, TIFF)
-                        </p>
-                      </div>
-                    </div>
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/tiff"
-                      className="hidden"
-                      id="assign-attachment-input"
-                      onChange={(e) => {
-                        if (e.target.files)
-                          setTaskAttachments(Array.from(e.target.files));
-                      }}
-                    />
-                  </div>
-                  <label
-                    htmlFor="assign-attachment-input"
-                    className="cursor-pointer"
                   />
                 </div>
               </div>

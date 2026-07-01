@@ -144,7 +144,7 @@ export function WeeklyRanking() {
               className="bg-surface-container-high text-on-surface border border-outline-variant/30 px-5 py-3 rounded-xl hover:bg-surface-container transition-all flex items-center gap-2 font-medium text-sm"
             >
               <Download size={16} />
-              Export
+              Download Template
             </button>
           )}
           {canImport && (
